@@ -14,6 +14,21 @@ scale itself, and keeps the official Monsieur Cuisine recipes.
 > but you do everything **at your own risk**. Tested on a Smart SKMS 1200 A1 (Android 8.1, system
 > version V01.00.83 from June 2022) in November 2026.
 
+<p align="center"><img src="docs/images/animation_demarrage.gif" width="560" alt="Camybrith Cooking boot animation"></p>
+
+| | |
+|---|---|
+| ![Home](docs/images/accueil.png) | ![Recipes](docs/images/recettes.png) |
+| **Home**: the recipe in progress, manual cooking, scale, top rated | **Recipes**: about 1,700 Monsieur Cuisine recipes, filters and favorites |
+| ![Recipe](docs/images/recette.png) | ![Guided weighing](docs/images/pesee-guidee.png) |
+| **A recipe**: ingredients, steps, reviews | **Guided cooking**: each ingredient is weighed in the bowl, step by step |
+| ![Manual cooking](docs/images/cuisson-manuelle.png) | ![Scale](docs/images/balance.png) |
+| **Manual cooking**: time, temperature and speed with the knob | **Scale**: the bowl fills up on screen until the target weight |
+| ![Search](docs/images/recherche.png) | ![Settings](docs/images/reglages.png) |
+| **Instant search**, even with typos | **Settings**: light or dark theme, language, sounds |
+
+<sub>Recipe photos are replaced by illustrations in these screenshots; on the robot they are the recipes' own photos. The screenshots show the app in French; it is also available in English.</sub>
+
 ## Install
 
 **Start here: [docs/GUIDE.en.md](docs/GUIDE.en.md)**, the step by step guide, written for someone

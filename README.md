@@ -14,6 +14,21 @@ moteur, la chauffe et la balance, et garde les recettes officielles Monsieur Cui
 > toucher à quoi que ce soit, mais tu fais tout **à tes risques**. Testé sur un Smart SKMS 1200 A1
 > (Android 8.1, version système V01.00.83 de juin 2022) en novembre 2026.
 
+<p align="center"><img src="docs/images/animation_demarrage.gif" width="560" alt="Animation de démarrage Camybrith Cooking"></p>
+
+| | |
+|---|---|
+| ![Accueil](docs/images/accueil.png) | ![Recettes](docs/images/recettes.png) |
+| **Accueil** : la recette en cours, la cuisson manuelle, la balance, les mieux notées | **Recettes** : près de 1 700 recettes Monsieur Cuisine, filtres et favoris |
+| ![Recette](docs/images/recette.png) | ![Pesée guidée](docs/images/pesee-guidee.png) |
+| **Une recette** : ingrédients, étapes, avis | **Cuisson guidée** : chaque ingrédient se pèse dans le bol, étape par étape |
+| ![Cuisson manuelle](docs/images/cuisson-manuelle.png) | ![Balance](docs/images/balance.png) |
+| **Cuisson manuelle** : durée, température et vitesse à la molette | **Balance** : le bol se remplit à l'écran jusqu'au poids voulu |
+| ![Recherche](docs/images/recherche.png) | ![Réglages](docs/images/reglages.png) |
+| **Recherche** instantanée, même avec des fautes | **Réglages** : thème clair ou sombre, langue, sons |
+
+<sub>Les photos de recettes sont remplacées par des illustrations sur ces captures : sur le robot, ce sont les photos des recettes.</sub>
+
 ## Installer
 
 **Commence ici : [docs/GUIDE.md](docs/GUIDE.md)**, le guide pas à pas, écrit pour quelqu'un qui
