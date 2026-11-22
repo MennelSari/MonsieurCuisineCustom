@@ -1,0 +1,6 @@
+id=camybrith_boot
+name=Camybrith Cooking : animation de démarrage
+version=1
+versionCode=1
+author=Camybrith Cooking
+description=Remplace l'animation de démarrage du Monsieur Cuisine Smart par Camybrith Cooking, sans toucher à /system. Désactiver le module dans Magisk rend l'animation d'origine.

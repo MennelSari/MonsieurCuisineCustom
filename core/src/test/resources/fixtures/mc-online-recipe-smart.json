@@ -1,0 +1,206 @@
+{
+ "code": 0,
+ "message": "A recipe is returned",
+ "data": {
+  "recipe": {
+   "id": 900010,
+   "author": {
+    "id": 1,
+    "name": " Chef d'essai ",
+    "avatar": "https://cdn.example.test/avatar.png"
+   },
+   "translationId": 1,
+   "language": "fr-FR",
+   "name": "Recette d'essai du Smart",
+   "status": "publish",
+   "deviceType": "MC3.0",
+   "deviceTypes": [
+    "MC3.0"
+   ],
+   "lastUpdated": "2026-04-19 09:00:02",
+   "thumbnail": {
+    "landscape": "https://cdn.example.test/uploads/2021/11/123essai.jpg",
+    "portrait": null
+   },
+   "detailsImage": {
+    "landscape": "https://cdn.example.test/uploads/2021/11/123essai-grand.jpg",
+    "portrait": null
+   },
+   "complexity": "Moyen",
+   "complexityLevel": 2,
+   "preparationDuration": 15,
+   "duration": 40,
+   "rating": 4.4,
+   "totalRating": 500,
+   "categories": [
+    {
+     "id": 1,
+     "name": "Soupes"
+    },
+    {
+     "id": 2,
+     "name": "Végétarien"
+    }
+   ],
+   "tags": [],
+   "description": "",
+   "hintsAndTips": "<p>Astuce&nbsp;: servir <b>chaud</b>.</p>",
+   "defaultServingSizeId": 1,
+   "servingSizes": [
+    {
+     "id": 1,
+     "amount": 4,
+     "servingUnit": "portions",
+     "instruction": "Texte complet.",
+     "modules": [],
+     "ingredientGroups": [
+      {
+       "order": 0,
+       "id": 77,
+       "name": "POUR LA GARNITURE"
+      }
+     ],
+     "ingredients": [
+      {
+       "order": 1,
+       "amount": "200",
+       "unit": "g",
+       "systemIngredientId": 10,
+       "ingredientGroupId": null,
+       "name": "carottes",
+       "ingredientCategory": null
+      },
+      {
+       "order": 0,
+       "amount": "1",
+       "unit": "",
+       "systemIngredientId": 11,
+       "ingredientGroupId": null,
+       "name": "oignon",
+       "ingredientCategory": null
+      },
+      {
+       "order": 2,
+       "amount": "10",
+       "unit": "g",
+       "systemIngredientId": 12,
+       "ingredientGroupId": 77,
+       "name": "persil",
+       "ingredientCategory": null
+      },
+      {
+       "order": 3,
+       "amount": "",
+       "unit": "",
+       "systemIngredientId": 13,
+       "ingredientGroupId": null,
+       "name": null,
+       "ingredientCategory": null
+      }
+     ],
+     "steps": [
+      {
+       "id": 1,
+       "step": 1,
+       "order": 0,
+       "name": "Mettre les légumes dans le bol mixeur.",
+       "description": "Mettre les légumes dans le bol mixeur.",
+       "deviceSetting": null
+      },
+      {
+       "id": 2,
+       "step": 2,
+       "order": 1,
+       "name": "Mode",
+       "description": null,
+       "deviceSetting": {
+        "reverse": false,
+        "turbo": false,
+        "size": null,
+        "texture": null,
+        "cleaningMode": null,
+        "mode": "ramp",
+        "settings": [
+         {
+          "order": 0,
+          "speed": 5,
+          "speedFloat": 5,
+          "temperature": 0,
+          "time": 20,
+          "weight": null
+         },
+         {
+          "order": 1,
+          "speed": 6,
+          "speedFloat": 6,
+          "temperature": 0,
+          "time": 20,
+          "weight": null
+         },
+         {
+          "order": 2,
+          "speed": 8,
+          "speedFloat": 8,
+          "temperature": 0,
+          "time": 20,
+          "weight": null
+         }
+        ]
+       }
+      },
+      {
+       "id": 3,
+       "step": 3,
+       "order": 2,
+       "name": "Faire tiédir.",
+       "description": "Faire tiédir.",
+       "deviceSetting": {
+        "reverse": true,
+        "turbo": false,
+        "size": null,
+        "texture": null,
+        "cleaningMode": null,
+        "mode": "customized",
+        "settings": [
+         {
+          "order": 0,
+          "speed": 1,
+          "speedFloat": 1,
+          "temperature": 40,
+          "time": 300,
+          "weight": null
+         }
+        ]
+       }
+      },
+      {
+       "id": 4,
+       "step": 4,
+       "order": 3,
+       "name": "Mijoter.",
+       "description": "Mijoter.",
+       "deviceSetting": {
+        "reverse": false,
+        "turbo": false,
+        "size": null,
+        "texture": null,
+        "cleaningMode": null,
+        "mode": "slow_cooking",
+        "settings": [
+         {
+          "order": 0,
+          "speed": null,
+          "speedFloat": null,
+          "temperature": 90,
+          "time": 14400,
+          "weight": null
+         }
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

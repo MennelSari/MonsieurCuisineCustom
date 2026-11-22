@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Seules les applis signées avec la même clé (l'interface Camybrith Cooking) peuvent piloter. -->
+    <permission
+        android:name="app.toque.permission.PILOTER"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <application
+        android:allowBackup="false"
+        android:label="Camybrith Cooking : pilote moteur"
+        android:icon="@android:drawable/ic_media_play"
+        android:vmSafeMode="true">
+        <!-- vmSafeMode : ni AOT ni JIT, tout est interprété. Sur le Monsieur Cuisine Smart
+             (Android 8.1, MT8167), le compilateur recompilait de travers des fonctions très
+             appelées (une fonction renvoyait null alors que son code ne le peut pas). Le pilote
+             envoie les commandes au moteur et à la chauffe : il reste interprété, l'interface non. -->
+
+        <service
+            android:name="app.toque.machine.MachineService"
+            android:exported="true"
+            android:permission="app.toque.permission.PILOTER"
+            android:stopWithTask="false" />
+    </application>
+</manifest>
