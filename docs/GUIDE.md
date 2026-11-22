@@ -1,5 +1,7 @@
 # Installer Camybrith Cooking sur un Monsieur Cuisine Smart, pas à pas
 
+🇬🇧 **[English version](GUIDE.en.md)**
+
 Ce guide part de zéro. Il est écrit pour quelqu'un qui n'a jamais rooté d'appareil Android : lis
 chaque étape en entier avant de la commencer, et ne saute rien. Compte deux à trois heures en tout,
 dont une bonne partie d'attente.

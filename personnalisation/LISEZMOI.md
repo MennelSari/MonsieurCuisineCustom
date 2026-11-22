@@ -1,5 +1,7 @@
 # Personnaliser Camybrith Cooking
 
+🇬🇧 **[English version](README.en.md)**
+
 Tout se change sans rien casser, et tout se remet d'origine en une commande.
 
 ## 1. Les sons (le plus simple)

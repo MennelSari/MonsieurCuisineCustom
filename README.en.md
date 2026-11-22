@@ -1,0 +1,111 @@
+# Camybrith Cooking
+
+🇫🇷 **[Version française](README.md)**
+
+**A new, fast and modern interface for the Lidl Monsieur Cuisine Smart kitchen robot (SKMS 1200 A1).**
+Free, open source (MIT license), no account, no subscription, and it works without Internet.
+
+Camybrith Cooking replaces the stock app on the robot's tablet. It drives the motor, heating and
+scale itself, and keeps the official Monsieur Cuisine recipes.
+
+> **Independent project**, not affiliated with Lidl, SilverCrest or Hoyer. The robot has to be
+> "rooted", which probably voids the warranty and carries a small risk of making it unusable if a
+> step goes wrong. The guide is written to avoid that, with a full backup before touching anything,
+> but you do everything **at your own risk**. Tested on a Smart SKMS 1200 A1 (Android 8.1, system
+> version V01.00.83 from June 2022) in November 2026.
+
+## Install
+
+**Start here: [docs/GUIDE.en.md](docs/GUIDE.en.md)**, the step by step guide, written for someone
+who has never done this kind of thing.
+
+You need:
+* a **Windows PC** (for the tool that writes to the robot's memory);
+* a **USB-A male to USB-A male** cable (USB 2.0) and a small Torx screwdriver;
+* your home Wi-Fi;
+* two to three hours, without rushing.
+
+Once the robot is rooted, everything else (install, updates, sounds, logo) is done **over Wi-Fi**,
+from Windows (with Ubuntu, see the guide), a Mac or Linux.
+
+> The app itself is available in **French and English** (*Settings › Langue · Language*). The
+> install scripts print their messages in French; the guide tells you what to expect at each step.
+
+## What you get
+
+* **An interface designed for the robot's screen and knob**, smooth on its small tablet.
+* **The Monsieur Cuisine recipes for the Smart**, downloaded from Lidl's public website, nightly
+  or on demand, with their settings, photos, ratings and reviews.
+* **Search that works**: ignores accents, plurals and typos. Search by ingredients, filters,
+  favorites.
+* **Guided cooking**: each step starts with one tap, the next one shows up by itself, weighing is
+  built in (knob or +10 g and +50 g buttons to reach the target weight).
+* **Your own recipes** written for another robot (JSON file, see
+  [docs/RECIPES.en.md](docs/RECIPES.en.md)): speeds, temperatures, Varoma and dough mode are
+  converted for the Smart, in a separate tab.
+* **Manual cooking**, steam, sauté, knead, Turbo, scale.
+* **Lid open = pause**, resumed with one tap once it is closed again.
+* **Offline**: nothing depends on a server.
+* **Everything can be customized**: sounds, the boot animation with your own logo, even the name
+  and icon (see [personnalisation/README.en.md](personnalisation/README.en.md)).
+
+## Cooking safety
+
+All the stock app's limits are kept (speed 3 max when heating and in reverse, maximum durations,
+Turbo conditions). The lid, errors and freshness of the base's data are checked **before** every
+start; a base that stops answering stops everything; an alert stays on screen until it is read;
+nothing restarts on its own after a pause.
+
+Motor control runs in **a separate app** (the "motor pilot"): if the interface crashes, cooking is
+not cut off. On top of that, the robot's board stops the motor by itself about 4 seconds after the
+last command it received.
+
+## Repository layout
+
+```
+docs/GUIDE.en.md     step by step install guide (start here)
+docs/RECIPES.en.md   importing your own recipes
+docs/SMART.md        technical notes on the Smart (protocol, programs, tests; French)
+outils/              scripts run from your computer: install, sounds, animation, nav bar…
+modules/             Magisk modules: ADB over Wi-Fi, boot animation
+personnalisation/    your sounds, your logo, and the tools to make them
+core/                pure Kotlin logic, tested without Android (protocol, safety, recipes)
+commun/              code shared by the interface and the pilot
+pilote/              "motor pilot" app (app.toque.pilote)
+app/                 interface app (app.toque)
+```
+
+## Building the APKs yourself
+
+The APKs are built and published automatically by GitHub (**Actions** tab, **Releases** page). To
+build them on your computer: JDK 17, Android SDK, then
+
+```
+./gradlew :core:test :pilote:assembleRelease :app:assembleRelease
+./gradlew -Pprudent=true :app:assembleRelease     # "prudente" (safe) version
+```
+
+The **fast** version ("rapide") is compiled ahead of time by Android before its first launch
+(that is what `outils/installer.sh` does): on this robot, Android's just-in-time compiler makes the
+interface crash. The **safe** version ("prudente") is never compiled: slower, but immune to that
+problem.
+
+## Adding a language
+
+The app is written in French, with English as well. Each language is one file in
+[`app/src/main/assets/lang/`](app/src/main/assets/lang): copy `en.json` to `de.json` for example,
+change `"_name"` and translate the values (keys are the French texts; keep `%s` and `%d`).
+
+## Credits and license
+
+Camybrith Cooking is a Smart port of **Toque**
+([Wuki60/MrCuisineVibeConnect](https://github.com/Wuki60/MrCuisineVibeConnect)), written for the
+Monsieur Cuisine Connect. Thanks to Wuki60 and Toque's contributors.
+
+The rooting method comes from the community of
+[EliasKotlyar/Monsieur-Cuisine-Connect-Hack](https://github.com/EliasKotlyar/Monsieur-Cuisine-Connect-Hack)
+(issue #38, especially depau and ihrapsa). Root is provided by
+[Magisk](https://github.com/topjohnwu/Magisk).
+
+MIT license: see [LICENSE](LICENSE). No Lidl code, recipe, image or file is included in this
+repository.

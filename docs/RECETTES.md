@@ -1,5 +1,7 @@
 # Importer tes propres recettes
 
+🇬🇧 **[English version](RECIPES.en.md)**
+
 Camybrith Cooking sait convertir pour le Smart des recettes **que tu possèdes**, écrites pour un
 Thermomix : les vitesses, températures, Varoma et pétrin sont adaptés automatiquement, et chaque
 réglage modifié est marqué « à vérifier ». Elles apparaissent dans un onglet à part et ne sont

@@ -1,5 +1,7 @@
 # Camybrith Cooking
 
+🇬🇧 **[English version](README.en.md)**
+
 **Une nouvelle interface, rapide et moderne, pour le robot Lidl Monsieur Cuisine Smart (SKMS 1200 A1).**
 Gratuite, libre (licence MIT), sans compte, sans abonnement, et elle marche même sans Internet.
 
