@@ -16,6 +16,8 @@ scale itself, and keeps the official Monsieur Cuisine recipes.
 
 <p align="center"><img src="docs/images/animation_demarrage.gif" width="560" alt="Camybrith Cooking boot animation"></p>
 
+<p align="center"><img src="docs/images/remplissage.gif" width="560" alt="Weighing: the bowl fills up on screen"><br><sub>Weighing for real: the bowl fills up on screen while you pour.</sub></p>
+
 | | |
 |---|---|
 | ![Home](docs/images/accueil.png) | ![Recipes](docs/images/recettes.png) |
