@@ -16,7 +16,7 @@ moteur, la chauffe et la balance, et garde les recettes officielles Monsieur Cui
 
 <p align="center"><img src="docs/images/animation_demarrage.gif" width="560" alt="Animation de démarrage Camybrith Cooking"></p>
 
-<p align="center"><img src="docs/images/remplissage.gif" width="560" alt="Pesée : le bol se remplit à l'écran"><br><sub>La pesée en vrai : le bol se remplit à l'écran pendant qu'on verse.</sub></p>
+<p align="center"><img src="docs/images/pesee-195g.gif" width="560" alt="Pesée : le bol se remplit à l'écran"><br><sub>La pesée en vrai : le bol se remplit à l'écran pendant qu'on verse.</sub></p>
 
 | | |
 |---|---|
