@@ -57,7 +57,11 @@ echo "3/5  Accès root de l'interface…"
 accorder_root app.toque "Camybrith Cooking"
 
 $A shell am force-stop app.toque
-if [ "$MODE" = rapide ]; then
+SDK=$($A shell getprop ro.build.version.sdk | tr -d '\r')
+if [ "$MODE" = rapide ] && [ "${SDK:-0}" -lt 24 ] 2>/dev/null; then
+  # Android 6 (Monsieur Cuisine Connect) compile déjà toute l'appli à l'installation.
+  echo "4/5  Android ${SDK} : l'appli est déjà compilée à l'installation."
+elif [ "$MODE" = rapide ]; then
   # Sur ce robot, la compilation « au fil de l'eau » d'Android (JIT) fait planter l'interface :
   # on la fait compiler entièrement avant la première ouverture.
   echo "4/5  Compilation de l'interface par Android (une à deux minutes, n'ouvre pas l'appli avant)…"

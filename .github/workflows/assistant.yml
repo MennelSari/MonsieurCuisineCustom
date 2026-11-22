@@ -10,6 +10,7 @@ on:
       - docs/GUIDE*.md
       - docs/RECETTES.md
       - docs/RECIPES.en.md
+      - docs/CONNECT*.md
       - personnalisation/LISEZMOI.md
       - personnalisation/README.en.md
       - outils/fabriquer_assistant.sh

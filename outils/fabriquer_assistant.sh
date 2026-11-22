@@ -9,7 +9,7 @@ T=$(mktemp -d)
 S="$T/camybrith-installer"
 mkdir -p "$S/references"
 cp "$RACINE/assistant/camybrith-installer/SKILL.md" "$S/"
-cp "$RACINE/docs/GUIDE.md" "$RACINE/docs/GUIDE.en.md" "$RACINE/docs/RECETTES.md" "$RACINE/docs/RECIPES.en.md" "$S/references/"
+cp "$RACINE/docs/GUIDE.md" "$RACINE/docs/GUIDE.en.md" "$RACINE/docs/RECETTES.md" "$RACINE/docs/RECIPES.en.md" "$RACINE/docs/CONNECT.md" "$RACINE/docs/CONNECT.en.md" "$S/references/"
 cp "$RACINE/personnalisation/LISEZMOI.md" "$S/references/PERSONNALISATION.md"
 cp "$RACINE/personnalisation/README.en.md" "$S/references/CUSTOMIZATION.en.md"
 mkdir -p "$OUT"

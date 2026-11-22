@@ -1,6 +1,6 @@
 # Camybrith Cooking
 
-🇫🇷 **[Version française](README.md)**
+🇫🇷 **[Version française](README.md)** · 🇪🇸 **[Versión en español](README.es.md)**
 
 **A new, fast and modern interface for the Lidl Monsieur Cuisine Smart kitchen robot (SKMS 1200 A1).**
 Free, open source (MIT license), no account, no subscription, and it works without Internet.
@@ -29,7 +29,7 @@ scale itself, and keeps the official Monsieur Cuisine recipes.
 | ![Search](docs/images/recherche.png) | ![Settings](docs/images/reglages.png) |
 | **Instant search**, even with typos | **Settings**: light or dark theme, language, sounds |
 
-<sub>Screenshots taken on the robot. Recipe photos belong to Monsieur Cuisine (Lidl). The screenshots show the app in French; it is also available in English.</sub>
+<sub>Screenshots taken on the robot. Recipe photos belong to Monsieur Cuisine (Lidl). The screenshots show the app in French; it is also available in English and Spanish.</sub>
 
 ## Install
 
@@ -45,8 +45,13 @@ You need:
 Once the robot is rooted, everything else (install, updates, sounds, logo) is done **over Wi-Fi**,
 from Windows (with Ubuntu, see the guide), a Mac or Linux.
 
-> The app itself is available in **French and English** (*Settings › Langue · Language*). The
+> The app itself is available in **French, English and Spanish** (*Settings › Langue · Language*). The
 > install scripts print their messages in French; the guide tells you what to expect at each step.
+
+## Got a Monsieur Cuisine Connect?
+
+Camybrith Cooking can also run on the **Connect** (SKMC 1200), as an **experimental** version: not
+tried on a real Connect yet. See [docs/CONNECT.en.md](docs/CONNECT.en.md).
 
 ## Let Claude guide you
 
@@ -129,7 +134,7 @@ problem.
 
 ## Adding a language
 
-The app is written in French, with English as well. Each language is one file in
+The app is written in French, with English and Spanish as well. Each language is one file in
 [`app/src/main/assets/lang/`](app/src/main/assets/lang): copy `en.json` to `de.json` for example,
 change `"_name"` and translate the values (keys are the French texts; keep `%s` and `%d`).
 

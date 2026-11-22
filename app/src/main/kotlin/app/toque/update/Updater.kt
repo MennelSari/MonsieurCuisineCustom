@@ -38,10 +38,12 @@ class Updater(private val context: Context) {
 
     /** Dernière version publiée (lève [Failure] avec un message lisible). */
     fun latest(): Release {
-        // Les versions publiées ne savent piloter que le Connect : sur le Smart, une mise à jour
-        // remplacerait le pilotage du Smart par celui du Connect. On les refuse tant que c'est le cas.
-        if (ToqueApp.of(context).prefs.robotModel == RobotModel.SMART)
-            throw Failure(tr("Mises à jour désactivées sur le Smart : les versions publiées ne pilotent que le Connect"))
+        // Camybrith Cooking = deux applis (interface et pilote moteur) qui doivent rester de la même
+        // version, et les versions de Toque publiées par Wuki60 remplaceraient l'interface seule.
+        // Les mises à jour passent donc par les scripts du projet (outils/telecharger.sh puis
+        // outils/installer.sh), sur le Smart comme sur le Connect.
+        throw Failure(tr("Mises à jour depuis l'ordinateur : outils/telecharger.sh puis outils/installer.sh (voir le guide)"))
+        @Suppress("UNREACHABLE_CODE")
         val c = open(Releases.LATEST_URL, "application/vnd.github+json")
         try {
             when (val code = c.responseCode) {

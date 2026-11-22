@@ -18,8 +18,9 @@ https://github.com/Tidusneo24150/camybrith-cooking/blob/main/docs/GUIDE.en.md (o
 
 ## How to talk
 
-* Answer in the person's language (French or English). The robot's menus are usually in French:
-  give the French label, with a translation if the person writes in English. The project's
+* Answer in the person's language (French, English, Spanish or any other). The robot's menus may
+  be in French or in the person's language: give the label as the guide writes it, with a
+  translation when the person writes in another language. The project's
   scripts print French messages: translate them when needed.
 * **One step at a time.** Give one short step (a few actions at most), then wait for the person
   to say it is done or to send a photo or the output. Never dump the whole guide.
@@ -35,8 +36,11 @@ https://github.com/Tidusneo24150/camybrith-cooking/blob/main/docs/GUIDE.en.md (o
 1. Greet briefly and explain the overall plan: backup, temporary recovery, root with Magisk,
    ADB over Wi-Fi, then the app. Two to three hours, most of it waiting.
 2. Check the prerequisites, asking only what you do not know yet:
-   * the robot is a **Monsieur Cuisine Smart SKMS 1200** (not a Connect, not a Compact). For a
-     Connect, point to the original Toque project (github.com/Wuki60/MrCuisineVibeConnect) and stop;
+   * the robot is a **Monsieur Cuisine Smart SKMS 1200** (not a Compact, which cannot run it). For
+     a **Connect (SKMC 1200)**, follow `references/CONNECT.en.md` instead: root with Toque's guide,
+     then this project's install steps. Say clearly that Camybrith Cooking on the Connect is
+     experimental and untested, and that Toque (github.com/Wuki60/MrCuisineVibeConnect) is the
+     proven choice there;
    * its Android system version (Monsieur Cuisine app: menu, Réglages, À propos). The guide was
      tested on **V01.00.83 (June 2022)**. Another version is not a reason to stop, but say that
      it is untested and insist even more on the backup;
@@ -76,6 +80,8 @@ explain the risk and refuse to guide that shortcut.
   original.
 * Step 6.2: the patched image is at most 16,777,216 bytes and starts with `ANDROID!`.
 * Step 7.5: `connected to…` then `uid=0(root)`.
+* The app can be switched to Spanish (or French/English) in Settings › Langue · Language; with
+  the app in Spanish, the recipe sync downloads Spanish recipes.
 * Step 8: `installer.sh` ends with "C'est fini" and shows both version names.
 
 ## Hard stops

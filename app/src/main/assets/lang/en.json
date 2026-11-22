@@ -534,5 +534,6 @@
   "Commande refusée (root ?)": "Command refused (root?)",
   "Accueil Android": "Android home",
   "Applis récentes": "Recent apps",
-  "Réglages Android": "Android settings"
+  "Réglages Android": "Android settings",
+  "Mises à jour depuis l'ordinateur : outils/telecharger.sh puis outils/installer.sh (voir le guide)": "Updates from the computer: outils/telecharger.sh then outils/installer.sh (see the guide)"
 }

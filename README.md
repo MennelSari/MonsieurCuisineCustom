@@ -1,6 +1,6 @@
 # Camybrith Cooking
 
-🇬🇧 **[English version](README.en.md)**
+🇬🇧 **[English version](README.en.md)** · 🇪🇸 **[Versión en español](README.es.md)**
 
 **Une nouvelle interface, rapide et moderne, pour le robot Lidl Monsieur Cuisine Smart (SKMS 1200 A1).**
 Gratuite, libre (licence MIT), sans compte, sans abonnement, et elle marche même sans Internet.
@@ -29,7 +29,7 @@ moteur, la chauffe et la balance, et garde les recettes officielles Monsieur Cui
 | ![Recherche](docs/images/recherche.png) | ![Réglages](docs/images/reglages.png) |
 | **Recherche** instantanée, même avec des fautes | **Réglages** : thème clair ou sombre, langue, sons |
 
-<sub>Captures prises sur le robot. Les photos des recettes sont celles de Monsieur Cuisine (Lidl).</sub>
+<sub>Captures prises sur le robot. Les photos des recettes sont celles de Monsieur Cuisine (Lidl). L'appli existe en français, en anglais et en espagnol.</sub>
 
 ## Installer
 
@@ -44,6 +44,11 @@ Il te faut :
 
 Une fois le robot rooté, tout le reste (installation, mises à jour, sons, logo) se fait **par le
 Wi-Fi**, depuis Windows (avec Ubuntu, voir le guide), un Mac ou Linux.
+
+## Tu as un Monsieur Cuisine Connect ?
+
+Camybrith Cooking peut aussi tourner sur le **Connect** (SKMC 1200), en version **expérimentale** :
+pas encore essayée sur un vrai Connect. Voir [docs/CONNECT.md](docs/CONNECT.md).
 
 ## Se faire guider par Claude
 
@@ -128,7 +133,7 @@ problème.
 
 ## Ajouter une langue
 
-L'appli est écrite en français, avec l'anglais en plus. Chaque langue est un fichier de
+L'appli est écrite en français, avec l'anglais et l'espagnol en plus. Chaque langue est un fichier de
 [`app/src/main/assets/lang/`](app/src/main/assets/lang) : copie `en.json` en `de.json` par exemple,
 change `"_name"` et traduis les valeurs (les clés sont les textes français, garde les `%s` et `%d`).
 
