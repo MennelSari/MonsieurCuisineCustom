@@ -13,7 +13,8 @@ cp "$RACINE/docs/GUIDE.md" "$RACINE/docs/GUIDE.en.md" "$RACINE/docs/RECETTES.md"
 cp "$RACINE/personnalisation/LISEZMOI.md" "$S/references/PERSONNALISATION.md"
 cp "$RACINE/personnalisation/README.en.md" "$S/references/CUSTOMIZATION.en.md"
 mkdir -p "$OUT"
+OUT=$(cd "$OUT" && pwd)
 rm -f "$OUT/camybrith-assistant-claude.zip"
-(cd "$T" && zip -q -r -X "$(cd "$OUT" && pwd)/camybrith-assistant-claude.zip" camybrith-installer)
+(cd "$T" && zip -q -r -X "$OUT/camybrith-assistant-claude.zip" camybrith-installer)
 rm -rf "$T"
 echo "Assistant prêt : $OUT/camybrith-assistant-claude.zip"
