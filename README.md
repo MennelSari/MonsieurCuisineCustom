@@ -27,7 +27,7 @@ moteur, la chauffe et la balance, et garde les recettes officielles Monsieur Cui
 | ![Recherche](docs/images/recherche.png) | ![Réglages](docs/images/reglages.png) |
 | **Recherche** instantanée, même avec des fautes | **Réglages** : thème clair ou sombre, langue, sons |
 
-<sub>Les photos de recettes sont remplacées par des illustrations sur ces captures : sur le robot, ce sont les photos des recettes.</sub>
+<sub>Captures prises sur le robot. Les photos des recettes sont celles de Monsieur Cuisine (Lidl).</sub>
 
 ## Installer
 
@@ -120,5 +120,5 @@ La méthode de root vient de la communauté du dépôt
 (discussion n° 38, en particulier depau et ihrapsa). Le root utilise
 [Magisk](https://github.com/topjohnwu/Magisk).
 
-Licence MIT : voir [LICENSE](LICENSE). Aucun code, recette, image ou fichier de Lidl n'est inclus
-dans ce dépôt.
+Licence MIT : voir [LICENSE](LICENSE). Aucun code, recette ou fichier de Lidl n'est inclus dans ce
+dépôt ; les seules images de Lidl sont les photos de recettes visibles sur les captures d'écran.

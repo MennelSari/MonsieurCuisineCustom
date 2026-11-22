@@ -27,7 +27,7 @@ scale itself, and keeps the official Monsieur Cuisine recipes.
 | ![Search](docs/images/recherche.png) | ![Settings](docs/images/reglages.png) |
 | **Instant search**, even with typos | **Settings**: light or dark theme, language, sounds |
 
-<sub>Recipe photos are replaced by illustrations in these screenshots; on the robot they are the recipes' own photos. The screenshots show the app in French; it is also available in English.</sub>
+<sub>Screenshots taken on the robot. Recipe photos belong to Monsieur Cuisine (Lidl). The screenshots show the app in French; it is also available in English.</sub>
 
 ## Install
 
@@ -122,5 +122,5 @@ The rooting method comes from the community of
 (issue #38, especially depau and ihrapsa). Root is provided by
 [Magisk](https://github.com/topjohnwu/Magisk).
 
-MIT license: see [LICENSE](LICENSE). No Lidl code, recipe, image or file is included in this
-repository.
+MIT license: see [LICENSE](LICENSE). No Lidl code, recipe or file is included in this repository;
+the only Lidl images are the recipe photos visible in the screenshots.
