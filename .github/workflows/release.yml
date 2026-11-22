@@ -61,6 +61,10 @@ jobs:
           bash personnalisation/fabriquer_module_animation.sh personnalisation/bootanimation.zip
           mv modules/camybrith_animation-perso.zip dist/camybrith_animation.zip
 
+      - name: Assistant Claude
+        if: steps.version.outputs.publish == 'true'
+        run: bash outils/fabriquer_assistant.sh dist
+
       - name: Publier sur GitHub
         if: steps.version.outputs.publish == 'true'
         env:
@@ -74,6 +78,7 @@ jobs:
             echo "* \`Camybrith-pilote-*.apk\` et \`Camybrith-$v-rapide.apk\` : à installer avec \`outils/installer.sh\`."
             echo "* \`Camybrith-$v-prudente.apk\` : version de secours, plus lente, si la rapide fait des bêtises."
             echo "* \`camybrith_animation.zip\` : animation de démarrage (module Magisk), avec \`outils/animation.sh installer\`."
+            echo "* \`camybrith-assistant-claude.zip\` : assistant Claude qui guide l'installation pas à pas (voir le README)."
             echo
             echo "Changements :"
             if [ -n "$prev" ]; then git log --no-merges --pretty='- %s' "$prev..HEAD"; else echo "- Première version publique."; fi

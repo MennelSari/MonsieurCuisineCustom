@@ -48,6 +48,26 @@ from Windows (with Ubuntu, see the guide), a Mac or Linux.
 > The app itself is available in **French and English** (*Settings › Langue · Language*). The
 > install scripts print their messages in French; the guide tells you what to expect at each step.
 
+## Let Claude guide you
+
+Prefer some company? The project ships a **ready-to-use assistant** for Claude: it knows the whole
+guide, moves forward one step at a time, checks file sizes and screen photos with you before each
+delicate step, and stops if anything looks wrong.
+
+1. Download `camybrith-assistant-claude.zip` from the
+   [Releases](https://github.com/Tidusneo24150/camybrith-cooking/releases/latest) page.
+2. On claude.ai or in the Claude app: make sure code execution and file creation are enabled in
+   **Settings > Capabilities**, then go to **Customize > Skills**, click **+**, **Create skill**,
+   **Upload a skill**, and pick the ZIP.
+3. Start a new conversation and write for example: "I want to install Camybrith Cooking on my
+   Monsieur Cuisine Smart, guide me."
+
+With **Claude Code** it is even simpler: open it in the project folder, it finds its instructions
+(`CLAUDE.md`) by itself and can run the scripts for you, asking before every action on the robot.
+
+Without a Claude account, you can also give the link to [docs/GUIDE.en.md](docs/GUIDE.en.md) to
+another assistant and ask it to guide you step by step.
+
 ## What you get
 
 * **An interface designed for the robot's screen and knob**, smooth on its small tablet.

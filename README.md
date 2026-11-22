@@ -45,6 +45,27 @@ Il te faut :
 Une fois le robot rooté, tout le reste (installation, mises à jour, sons, logo) se fait **par le
 Wi-Fi**, depuis Windows (avec Ubuntu, voir le guide), un Mac ou Linux.
 
+## Se faire guider par Claude
+
+Tu préfères être accompagné ? Le projet fournit un **assistant prêt à l'emploi** pour Claude : il
+connaît tout le guide, te fait avancer une étape à la fois, vérifie avec toi les tailles de
+fichiers et les photos d'écran avant chaque étape délicate, et s'arrête si quelque chose cloche.
+
+1. Télécharge `camybrith-assistant-claude.zip` sur la page
+   [Releases](https://github.com/Tidusneo24150/camybrith-cooking/releases/latest).
+2. Sur claude.ai ou dans l'appli Claude : vérifie que l'exécution de code et la création de
+   fichiers sont activées dans **Réglages > Capacités**, puis va dans **Personnaliser > Skills**,
+   bouton **+**, **Créer un skill**, **Importer un skill**, et choisis le ZIP.
+3. Ouvre une nouvelle conversation et écris par exemple : « Je veux installer Camybrith Cooking
+   sur mon Monsieur Cuisine Smart, guide-moi. »
+
+Avec **Claude Code**, c'est encore plus simple : ouvre-le dans le dossier du projet, il trouve
+tout seul ses instructions (`CLAUDE.md`) et peut lancer les scripts pour toi, en te demandant
+avant chaque action sur le robot.
+
+Sans compte Claude, tu peux aussi donner le lien de [docs/GUIDE.md](docs/GUIDE.md) à un autre
+assistant et lui demander de te guider pas à pas.
+
 ## Ce que ça change
 
 * **Une interface pensée pour l'écran et la molette du robot**, fluide sur sa petite tablette.

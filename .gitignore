@@ -32,3 +32,4 @@ personnalisation/bootanimation*
 personnalisation/sons/*
 !personnalisation/sons/LISEZMOI.md
 __pycache__/
+assistant/*.zip

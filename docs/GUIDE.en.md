@@ -8,6 +8,9 @@ total, a good part of it waiting.
 
 Steps 1 to 6 (the **root**) are done only once. After that, everything happens over Wi-Fi.
 
+> **Want company?** A ready-to-use Claude assistant can guide you step by step: see "Let
+> Claude guide you" in the [README](../README.en.md).
+
 > Menu names on the robot are given as they appear on a robot set to French, with the English
 > wording next to them when it helps. The install scripts print their messages in French; the
 > guide says what they should end with.

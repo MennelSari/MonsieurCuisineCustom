@@ -8,6 +8,9 @@ dont une bonne partie d'attente.
 
 Les étapes 1 à 6 (le **root**) ne se font qu'une fois. Ensuite, tout se fait par le Wi-Fi.
 
+> **Envie d'être accompagné ?** Un assistant Claude prêt à l'emploi peut te guider étape par
+> étape : voir « Se faire guider par Claude » dans le [README](../README.md).
+
 ## Sommaire
 
 0. [Avant de commencer](#0-avant-de-commencer)
