@@ -43,6 +43,8 @@ abstract class Screen(val a: MainActivity) {
     open val subtitle: String = ""
     /** L'accueil dessine son propre en-tête. */
     open val showTopBar: Boolean = true
+    /** La barre de navigation du bas (masquée pendant la cuisson guidée, comme sur la maquette). */
+    open val showNav: Boolean = true
     val view: View by lazy { build() }
     val c: Context get() = a
 
@@ -56,40 +58,33 @@ abstract class Screen(val a: MainActivity) {
     open fun canLeave(): Boolean = true
 }
 
-/** Barre de navigation, à gauche de tous les écrans. */
+/**
+ * Barre de navigation du design v2 : une pilule blanche en bas de l'écran, l'entrée active en
+ * pilule noire. Les réglages s'ouvrent par la roue dentée de l'en-tête.
+ */
 class NavRail(private val a: MainActivity) : LinearLayout(a) {
     private val items = HashMap<Section, LinearLayout>()
 
+    /** Entrées affichées, dans l'ordre de la maquette. */
+    private val shown = listOf(Section.HOME, Section.RECIPES, Section.MANUAL, Section.PROGRAMS, Section.SCALE)
+
     init {
-        orientation = VERTICAL
-        gravity = Gravity.CENTER_HORIZONTAL
-        setBackgroundColor(Ui.RAIL)
-        setPadding(0, Ui.u(16), 0, Ui.u(12))
-        // Marque : la cocotte orange et le nom de l'appli, comme le logo de démarrage.
-        val logo = Ui.vertical(a, Gravity.CENTER_HORIZONTAL)
-        logo.addView(BrandMark(a), LayoutParams(Ui.u(34), Ui.u(30)))
-        val name = try { a.applicationInfo.loadLabel(a.packageManager).toString() } catch (_: Exception) { "Camybrith Cooking" }
-        val words = name.trim().split(Regex("\\s+"))
-        logo.addView(Ui.text(a, words.first(), 13f, Ui.TEXT, Ui.BRAND_BOLD).apply { gravity = Gravity.CENTER; maxLines = 1 }, Ui.lp(Ui.WRAP, Ui.WRAP, t = 4))
-        if (words.size > 1) logo.addView(Ui.text(a, words.drop(1).joinToString(" ").uppercase(), 7.5f, Ui.ACCENT, Ui.BRAND_LIGHT).apply {
-            gravity = Gravity.CENTER
-            letterSpacing = 0.3f
-            maxLines = 1
-        }, Ui.lp(Ui.WRAP, Ui.WRAP, t = 1))
-        addView(logo, Ui.lp(Ui.WRAP, Ui.WRAP, b = 12))
-        for (s in Section.values()) {
-            if (s == Section.SETTINGS) addView(View(a), LayoutParams(1, 0, 1f))
+        orientation = HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        background = Ui.round(Ui.RAIL, 29f)
+        Ui.lift(this, 1f)
+        setPadding(Ui.u(7), 0, Ui.u(7), 0)
+        for (s in shown) {
             val item = item(s)
             items[s] = item
-            // Sept entrées dans 600 unités de haut : 60 + 3 chacune.
-            addView(item, LayoutParams(Ui.u(74), Ui.u(60)).apply { topMargin = Ui.u(3) })
+            addView(item, LayoutParams(0, Ui.u(45), 1f).apply { leftMargin = Ui.u(3); rightMargin = Ui.u(3) })
         }
     }
 
     private fun item(s: Section): LinearLayout {
-        val v = Ui.vertical(a, Gravity.CENTER)
-        v.addView(Icon(a, s.icon, Ui.TEXT2), LayoutParams(Ui.u(24), Ui.u(24)))
-        v.addView(Ui.text(a, s.label, 12.5f, Ui.TEXT2, Ui.REGULAR).apply { gravity = Gravity.CENTER; maxLines = 1 }, Ui.lp(Ui.WRAP, Ui.WRAP, t = 5))
+        val v = Ui.horizontal(a, Gravity.CENTER)
+        v.addView(Icon(a, s.icon, Ui.TEXT2).apply { strokeWidth = 2f }, LayoutParams(Ui.u(17), Ui.u(17)))
+        v.addView(Ui.text(a, s.label, 13f, Ui.TEXT2, Ui.MEDIUM).apply { maxLines = 1 }, Ui.lp(Ui.WRAP, Ui.WRAP, l = 8))
         v.isClickable = true
         v.contentDescription = s.label
         v.tap { a.open(s) }
@@ -99,12 +94,12 @@ class NavRail(private val a: MainActivity) : LinearLayout(a) {
     fun select(sel: Section?) {
         for ((s, v) in items) {
             val on = s == sel
-            val col = if (on) Ui.ACCENT else Ui.TEXT2
-            v.background = if (on) Ui.round(Ui.ACCENT_SOFT, 18f) else Ui.pressable(Ui.round(0, 18f), 18f)
+            val col = if (on) Ui.ON_INK else Ui.TEXT2
+            v.background = if (on) Ui.round(Ui.INK, 22.5f) else Ui.pressable(Ui.round(0, 22.5f), 22.5f)
             (v.getChildAt(0) as Icon).color = col
             (v.getChildAt(1) as TextView).apply {
                 setTextColor(col)
-                typeface = if (on) Ui.MEDIUM else Ui.REGULAR
+                typeface = if (on) Ui.BOLD else Ui.MEDIUM
             }
         }
     }
@@ -135,6 +130,13 @@ class StatusPills(private val a: MainActivity, showClock: Boolean = true) : Line
         link.addView(dot, 0, LayoutParams(Ui.u(9), Ui.u(9)).apply { rightMargin = Ui.u(7) })
         addView(link, Ui.lp(Ui.WRAP, Ui.WRAP))
         if (showClock) addView(clock, Ui.lp(Ui.WRAP, Ui.WRAP, l = 14))
+        val gear = FrameLayout(a)
+        gear.background = Ui.pressable(Ui.round(Ui.SURFACE2, 17f), 17f)
+        gear.addView(Icon(a, Icon.Kind.SETTINGS, Ui.TEXT).apply { strokeWidth = 2f }, Ui.flp(Ui.u(17), Ui.u(17), Gravity.CENTER))
+        gear.isClickable = true
+        gear.contentDescription = tr("Réglages")
+        gear.tap { a.open(Section.SETTINGS) }
+        addView(gear, LayoutParams(Ui.u(34), Ui.u(34)).apply { leftMargin = Ui.u(10) })
         lid.visibility = GONE
         temp.visibility = GONE
         // Appui long sur l'heure : commandes d'Android (Retour, Accueil, Applis récentes), utiles
@@ -316,11 +318,17 @@ class MachineDock(private val a: MainActivity) : FrameLayout(a) {
         } else a.machine.pause { a.refusal(it) }
     }
 
+    /** Dernière apparition ou disparition de la barre (les boutons de l'écran se déplacent alors). */
+    var changedAt = 0L
+        private set
+
     fun update(s: Snapshot) {
         last = s
         val st = s.state
         val showJob = s.jobActive || s.turboActive
-        visibility = if (showJob || s.hasFault) View.VISIBLE else View.GONE
+        val vis = if (showJob || s.hasFault) View.VISIBLE else View.GONE
+        if (vis != visibility) changedAt = android.os.SystemClock.uptimeMillis()
+        visibility = vis
         faultRow.visibility = if (s.hasFault) View.VISIBLE else View.GONE
         jobRow.visibility = if (!s.hasFault && showJob) View.VISIBLE else View.GONE
         progress.visibility = jobRow.visibility

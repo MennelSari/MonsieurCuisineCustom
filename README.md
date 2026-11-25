@@ -1,4 +1,138 @@
-# Camybrith Cooking
+# MonsieurCuisineCustom
+
+**Une interface perso pour le robot Lidl Monsieur Cuisine Smart (SKMS 1200 A1)** : nouveau design,
+cuisson à molettes, 16 programmes, recettes Cookomix importées et converties, envoi depuis l'iPhone.
+Fork de [Camybrith Cooking](https://github.com/Tidusneo24150/camybrith-cooking) (licence MIT).
+
+---
+
+## 🔎 Modèles compatibles
+
+| Modèle | Référence | État |
+|---|---|---|
+| **Monsieur Cuisine Smart** | **SKMS 1200 A1** | ✅ **Testé** : root, moteur, chauffe, balance, couvercle, import Cookomix |
+| Monsieur Cuisine Connect | SKMC 1200 | ⚠️ **Non testé** avec ce fork. Camybrith le prend en charge en version expérimentale ([docs/CONNECT.md](docs/CONNECT.md)) ; le nouveau design n'a jamais tourné dessus |
+| Autres modèles (Édition Plus, Trend…) | — | ❌ **Non testés, probablement pas compatibles** : n'essaie pas |
+
+Configuration exacte du robot testé : Android **8.1.0**, système **V01.00.83** (juin 2022), appli
+Lidl **2.22.0**, base moteur **3090**, puce MediaTek MT8167. **Une autre version du système ou de
+l'appli Lidl peut se comporter différemment** : vérifie la tienne (menu ⋮ › Réglages › À propos)
+et redouble de prudence si elle diffère. La référence du modèle est sur l'étiquette sous le robot.
+
+## ⚠️ Avertissements : à lire avant tout
+
+> **Je ne suis responsable de rien.** Ce projet est partagé tel quel, **sans aucune garantie**.
+> Si ton robot ne marche plus, chauffe ou tourne quand il ne faut pas, perd ses données, ou si
+> quoi que ce soit se passe mal : **c'est sous ta seule responsabilité.**
+
+* **Rooter le robot annule probablement la garantie** et peut le rendre **inutilisable**
+  (« brick ») en cas d'erreur. Fais **toujours une sauvegarde complète** avant de toucher à quoi
+  que ce soit, et garde-la en lieu sûr.
+* **L'appli commande un moteur et une résistance chauffante.** Fais les premiers essais **bol vide,
+  couvercle fermé, la main sur l'interrupteur**. Ne laisse jamais le robot tourner sans surveillance.
+* **Ne fais pas les mises à jour système Lidl** une fois rooté, et n'efface jamais la partition `cache`.
+* Projet **indépendant**, sans lien avec Lidl, SilverCrest, Hoyer ni Cookomix. Les marques citées
+  appartiennent à leurs propriétaires.
+* **Cookomix** : l'import lit une recette à la fois, à ta demande, pour **ton usage personnel**. Les
+  recettes et photos restent la propriété de leurs auteurs ; aucune n'est incluse dans ce dépôt.
+  Les réglages convertis sont marqués « à vérifier » : **relis-les** avant de lancer.
+* Si tu ne comprends pas une étape : **arrête-toi**. Mieux vaut demander que deviner.
+
+## 🤖 Se faire aider par une IA (conseillé)
+
+Le plus simple pour suivre ce tutoriel sans te tromper : **donne ce dépôt à un assistant IA**
+(Claude, ChatGPT…), idéalement un assistant qui peut lire les fichiers et lancer des commandes
+(par exemple Claude Code). Ouvre le dossier du dépôt avec lui et dis-lui par exemple :
+
+> « Lis le README, docs/GUIDE.md et docs/root-sans-twrp/LISEZMOI.md, puis guide-moi pas à pas pour
+> rooter mon Monsieur Cuisine Smart et installer cette appli. Demande-moi mon accord avant chaque
+> écriture dans la mémoire du robot. »
+
+Il pourra lire le code, t'expliquer chaque étape, vérifier tes sauvegardes et diagnostiquer les
+problèmes. Le dépôt contient déjà des consignes pour les assistants (`CLAUDE.md`, `AGENTS.md`).
+**Reste attentif quand même** : une IA peut se tromper, relis ce qu'elle te propose.
+
+---
+
+## Tutoriel pas à pas
+
+Résumé ; les détails sont dans [docs/GUIDE.md](docs/GUIDE.md) (guide complet de Camybrith, PC
+Windows) et [docs/root-sans-twrp/LISEZMOI.md](docs/root-sans-twrp/LISEZMOI.md) (variante Mac,
+quand le tactile de TWRP ne répond pas).
+
+1. **Vérifie ton robot** : Monsieur Cuisine **Smart** SKMS 1200 A1 (étiquette sous le robot),
+   Android 8.1. Il faut un **câble USB de données** (pas un câble de charge seule) branché sur le
+   port **« Android USB »** sous le robot.
+2. **Sauvegarde complète** de la mémoire du robot (mtkclient ou SP Flash Tool), vérifie la taille
+   de chaque fichier et copie-la en lieu sûr.
+3. **Root** avec Magisk : méthode TWRP du guide, ou variante sans TWRP sur Mac.
+4. **ADB Wi-Fi** : active le débogage USB dans les réglages Android (menu usine), puis vérifie
+   `adb connect IP-du-robot:5555` et `adb shell su -c id` → `uid=0(root)`.
+5. **Compile et installe l'appli** (JDK 17 et SDK Android) :
+   ```
+   ./gradlew :core:test :pilote:assembleRelease :app:assembleRelease
+   adb install -r pilote/build/outputs/apk/release/pilote-release.apk
+   adb install -r app/build/outputs/apk/release/app-release.apk
+   adb shell cmd package compile -m speed -f app.toque     # indispensable sur ce robot
+   ```
+   Puis accorde le root aux deux applis dans Magisk (onglet Superutilisateur), ou utilise
+   `outils/installer.sh`.
+6. **Premiers essais, en mode Démo** : l'appli démarre en Démo, le moteur est simulé. Fais le tour
+   des écrans.
+7. **Passe au vrai moteur**, prudemment : Réglages › Machine › **Machine réelle** › Continuer, puis
+   les essais du guide (étape 9) : bol vide vitesse 2 pendant 10 s ; ouverture du couvercle en
+   marche (le moteur doit s'arrêter) ; 200 ml d'eau à 37 °C ; la balance.
+8. **Importer des recettes Cookomix** : écran Recettes › **Importer**, colle le lien. Ou depuis
+   l'iPhone avec le raccourci ci-dessous.
+9. **Au démarrage du robot**, si Android demande quelle appli ouvrir, choisis l'appli, puis « Toujours ».
+
+**Revenir à l'appli Lidl** : Réglages › Machine › « Revenir à l'appli d'origine ». **Annuler le
+root** : réécris ton `boot` d'origine depuis la sauvegarde.
+
+### Raccourci iPhone « Envoyer au robot »
+
+App **Raccourcis** › nouveau raccourci › ⓘ › **Afficher dans la feuille de partage** (« Recevoir
+URL depuis Feuille de partage »). Action **Obtenir le contenu de l'URL** :
+`http://IP-du-robot:8766/importer`, méthode **POST**, corps **JSON**, champ `url` = **Entrée du
+raccourci**. Ensuite, sur une recette Cookomix : **Partager › Envoyer au robot**. Sans raccourci,
+ouvre simplement `http://IP-du-robot:8766` sur le téléphone et colle le lien. Pense à réserver
+l'adresse IP du robot dans ta box (bail DHCP statique).
+
+---
+
+## Ce que ce fork ajoute à Camybrith Cooking
+
+* **Nouveau design** clair inspiré du Thermomix TM7 : police Manrope, icônes au trait, navigation
+  en pilule, rendus 3D du bol (ouvert, fermé, en chauffe, vapeur, pétrissage…).
+* **Cuisson manuelle à molettes** : minutes, secondes, température et vitesse au doigt.
+* **Les 16 programmes du Smart** en grille, chacun avec son rendu du bol et ses réglages.
+* **Import Cookomix** : conversion des réglages Thermomix pour le Smart (Varoma → vapeur, vitesse
+  cuillère → vitesse 1 en sens inverse, vitesses plafonnées en chauffe…), étapes adaptées marquées
+  « à vérifier ».
+* **Envoi depuis le téléphone** : petite page sur le Wi-Fi de la maison (`http://IP-du-robot:8766`,
+  réseau local uniquement) et raccourci iPhone.
+* **Recettes perso** : éditeur d'étapes avec réglages vérifiés par les règles de sécurité, **photo
+  du plat prise avec le téléphone** via un QR code affiché sur le robot.
+
+| | |
+|---|---|
+| ![Cuisson manuelle](docs/images/v2/cuisson-manuelle.png) | ![Programmes](docs/images/v2/programmes.png) |
+| **Cuisson manuelle** à molettes | **Programmes** du Smart |
+| ![Éditeur](docs/images/v2/editeur.png) | |
+| **Éditeur** de recettes perso | |
+
+<sub>Captures prises sur le robot.</sub>
+
+### Crédits et licence
+
+Licence **MIT** (voir [LICENSE](LICENSE)). Tout le cœur (pilotage du moteur, sécurités, protocole)
+vient de Camybrith Cooking et Toque. Police [Manrope](https://github.com/googlefonts/manrope)
+(SIL OFL). Générateur de QR code d'après l'algorithme de référence de Project Nayuki (MIT).
+
+---
+
+## Projet d'origine : Camybrith Cooking
+
 
 🇬🇧 **[English version](README.en.md)** · 🇪🇸 **[Versión en español](README.es.md)**
 

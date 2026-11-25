@@ -20,13 +20,11 @@ import app.toque.ui.Icon
 import app.toque.ui.MainActivity
 import app.toque.ui.Screen
 import app.toque.ui.Section
-import app.toque.ui.SpeedBar
-import app.toque.ui.TempRing
-import app.toque.ui.TempScale
 import app.toque.ui.Ui
+import app.toque.ui.Wheel
 import app.toque.ui.tap
-import app.toque.ui.ValueCard
 import app.toque.ui.isSmart
+import android.widget.ImageView
 
 /**
  * Cuisson manuelle. Les réglages incompatibles sont corrigés à la saisie (vitesse limitée en
@@ -43,16 +41,15 @@ class ManualScreen(a: MainActivity, preset: app.toque.core.recipes.StepMachine? 
     private var accessory = preset?.accessory ?: Accessory.BLADE
     private var selected = 0
 
-    private lateinit var timeCard: ValueCard
-    private lateinit var tempCard: ValueCard
-    private lateinit var speedCard: ValueCard
-    private lateinit var dirRow: LinearLayout
+    private lateinit var wMin: Wheel
+    private lateinit var wSec: Wheel
+    private lateinit var wTemp: Wheel
+    private lateinit var wSpeed: Wheel
     private lateinit var accRow: LinearLayout
-    private lateinit var ring: TempRing
+    private lateinit var revBtn: LinearLayout
+    private lateinit var bowl: ImageView
+    private lateinit var caption: TextView
     private lateinit var weight: TextView
-    private lateinit var lid: TextView
-    private lateinit var speedBar: SpeedBar
-    private lateinit var tempScale: TempScale
     private lateinit var startBtn: LinearLayout
     private lateinit var hint: TextView
     private lateinit var turbo: HoldButton
@@ -63,75 +60,76 @@ class ManualScreen(a: MainActivity, preset: app.toque.core.recipes.StepMachine? 
     private var configuredSeconds = seconds
     private val pushLive = Runnable { sendAdjust() }
 
+    /**
+     * Design v2 : quatre molettes (minutes, secondes, température, vitesse) sur une bande centrale,
+     * le rendu du bol à droite (ouvert, fermé, en chauffe) avec la balance, et en bas le sens
+     * inverse, le Turbo et le grand bouton Démarrer.
+     */
     override fun build(): View {
-        val root = Ui.horizontal(c, Gravity.TOP)
-        root.setPadding(Ui.u(24), Ui.u(2), Ui.u(22), Ui.u(16))
-        val left = Ui.vertical(c)
-        val cards = Ui.horizontal(c)
-        timeCard = ValueCard(c, tr("Durée"), Icon.Kind.CLOCK)
-        tempCard = ValueCard(c, tr("Température"), Icon.Kind.THERMO)
-        speedCard = ValueCard(c, tr("Vitesse"), Icon.Kind.SPEED)
-        val all = listOf(timeCard, tempCard, speedCard)
-        for ((i, card) in all.withIndex()) {
-            card.onSelect = { selected = i; refresh() }
-            card.onMinus = { change(i, -1) }
-            card.onPlus = { change(i, 1) }
-            cards.addView(card, LinearLayout.LayoutParams(0, Ui.MATCH, 1f).apply { if (i < 2) rightMargin = Ui.u(12) })
-        }
-        // Durées toutes prêtes
-        val presets = Ui.horizontal(c)
-        for ((k, sec) in intArrayOf(60, 300, 600).withIndex()) {
-            val t = Ui.text(c, Ui.duration(sec), 13.5f, Ui.TEXT2, Ui.MEDIUM).apply { gravity = Gravity.CENTER }
-            t.background = Ui.pressable(Ui.round(0, 16f, Ui.STROKE, 1.2f), 16f)
-            t.isClickable = true
-            t.tap { selected = 0; setSeconds(sec) }
-            presets.addView(t, LinearLayout.LayoutParams(0, Ui.u(32), 1f).apply { if (k > 0) leftMargin = Ui.u(6) })
-        }
-        timeCard.extra.addView(presets, Ui.flp(Ui.MATCH, Ui.WRAP))
-        val table = TemperatureTable.current
-        tempScale = TempScale(c, IntArray(table.maxLevel + 1) { table.celsius(it) })
-        tempScale.onPick = { lv -> selected = 1; setTempLevel(lv) }
-        tempCard.extra.addView(tempScale, Ui.flp(Ui.MATCH, Ui.WRAP))
-        speedBar = SpeedBar(c)
-        speedBar.onPick = { lv -> selected = 2; setSpeed(lv) }
-        speedCard.extra.addView(speedBar, Ui.flp(Ui.MATCH, Ui.u(38)))
-        left.addView(cards, LinearLayout.LayoutParams(Ui.MATCH, 0, 1f))
+        val root = Ui.vertical(c)
+        root.setPadding(Ui.u(19), Ui.u(2), Ui.u(19), Ui.u(4))
+        val main = Ui.horizontal(c, Gravity.TOP)
 
-        val options = Ui.horizontal(c)
-        dirRow = Ui.horizontal(c)
-        accRow = Ui.horizontal(c)
-        options.addView(dirRow)
-        options.addView(accRow, Ui.lp(Ui.WRAP, Ui.WRAP, l = 14))
-        options.addView(Ui.spacer(c, weight = 1f), LinearLayout.LayoutParams(0, 1, 1f))
-        turbo = HoldButton(c, "Turbo", onDown = {
-            a.machine.turboDown(accessory) { v -> if (!v.ok) a.refusal(v) }
-        }, onUp = { a.machine.turboUp() })
-        options.addView(turbo, Ui.lp(Ui.WRAP, Ui.u(52)))
-        left.addView(options, Ui.lp(Ui.MATCH, Ui.WRAP, t = 14))
-        root.addView(left, LinearLayout.LayoutParams(0, Ui.MATCH, 1f).apply { rightMargin = Ui.u(16) })
+        val card = Ui.vertical(c)
+        card.setPadding(Ui.u(19), Ui.u(15), Ui.u(19), Ui.u(15))
+        card.background = Ui.round(Ui.SURFACE, 22f)
+        val titles = Ui.horizontal(c)
+        for ((t, col) in listOf(tr("Minutes") to Ui.TEXT2, tr("Secondes") to Ui.TEXT2, tr("Température") to Ui.ACCENT, tr("Vitesse") to Ui.COOL)) {
+            titles.addView(Ui.text(c, t.uppercase(), 10.5f, col, Ui.HEADING).apply { gravity = Gravity.CENTER; letterSpacing = 0.06f }, LinearLayout.LayoutParams(0, Ui.WRAP, 1f))
+        }
+        card.addView(titles)
+        val wheels = android.widget.FrameLayout(c)
+        val band = View(c)
+        band.background = Ui.round(Ui.BG, 22f)
+        wheels.addView(band, Ui.flp(Ui.MATCH, Ui.u(70), Gravity.CENTER_VERTICAL))
+        val row = Ui.horizontal(c)
+        wMin = Wheel(c, Ui.TEXT); wSec = Wheel(c, Ui.TEXT); wTemp = Wheel(c, Ui.ACCENT); wSpeed = Wheel(c, Ui.COOL)
+        wSec.labels = (0 until 12).map { String.format("%02d", it * 5) }
+        for (w in listOf(wMin, wSec, wTemp, wSpeed)) row.addView(w, LinearLayout.LayoutParams(0, Ui.MATCH, 1f))
+        wheels.addView(row, Ui.flp())
+        card.addView(wheels, LinearLayout.LayoutParams(Ui.MATCH, 0, 1f).apply { topMargin = Ui.u(4) })
+        wMin.onChange = { i -> selected = 0; setSeconds(maxOf(5, i * 60 + (seconds % 60))) }
+        wSec.onChange = { i -> selected = 0; setSeconds(maxOf(5, (seconds / 60) * 60 + i * 5)) }
+        wTemp.onChange = { i -> selected = 1; setTempLevel(tempSteps[i.coerceIn(0, tempSteps.size - 1)]) }
+        wSpeed.onChange = { i -> selected = 2; setSpeed(i + 1) }
+        hint = Ui.text(c, "", 11.5f, Ui.ACCENT, Ui.HEADING).apply { gravity = Gravity.CENTER }
+        hint.setPadding(Ui.u(12), Ui.u(8), Ui.u(12), Ui.u(8))
+        card.addView(hint, Ui.lp(Ui.MATCH, Ui.WRAP, t = 6))
+        main.addView(card, LinearLayout.LayoutParams(0, Ui.MATCH, 1f).apply { rightMargin = Ui.u(11) })
 
         val right = Ui.vertical(c, Gravity.CENTER_HORIZONTAL)
-        right.background = Ui.round(Ui.SURFACE, 24f)
-        Ui.lift(right)
-        right.setPadding(Ui.u(18), Ui.u(14), Ui.u(18), Ui.u(16))
-        right.addView(Ui.label(c, tr("Dans le bol"), Ui.TEXT2, 12.5f), Ui.lp(Ui.MATCH, Ui.WRAP))
-        ring = TempRing(c)
-        right.addView(ring, LinearLayout.LayoutParams(Ui.MATCH, 0, 1f).apply { topMargin = Ui.u(4) })
-        fun row(label: String): TextView {
-            val r = Ui.horizontal(c)
-            r.addView(Ui.text(c, label, 15f, Ui.TEXT2), LinearLayout.LayoutParams(0, Ui.WRAP, 1f))
-            val v = Ui.text(c, "", 15f, Ui.TEXT, Ui.MEDIUM)
-            r.addView(v)
-            right.addView(r, Ui.lp(t = 8))
-            return v
-        }
-        weight = row(tr("Balance"))
-        lid = row(tr("Couvercle"))
-        hint = Ui.text(c, "", 14f, Ui.WARN).apply { gravity = Gravity.CENTER; setLineSpacing(0f, 1.1f) }
-        right.addView(hint, Ui.lp(Ui.MATCH, Ui.WRAP, t = 10))
-        startBtn = Ui.button(c, tr("Démarrer"), Ui.Style.PRIMARY, Icon.Kind.PLAY, height = 68, textSize = 21f) { start() }
-        right.addView(startBtn, Ui.lp(Ui.MATCH, Ui.WRAP, t = 10))
-        root.addView(right, LinearLayout.LayoutParams(Ui.u(246), Ui.MATCH))
+        right.setPadding(Ui.u(15), Ui.u(12), Ui.u(15), Ui.u(14))
+        right.background = Ui.round(Ui.SURFACE, 22f)
+        bowl = Ui.bowl(c, "couvercle")
+        right.addView(bowl, LinearLayout.LayoutParams(Ui.MATCH, 0, 1f))
+        caption = Ui.text(c, "", 12f, Ui.TEXT2, Ui.MEDIUM).apply { gravity = Gravity.CENTER }
+        right.addView(caption, Ui.lp(Ui.MATCH, Ui.WRAP, t = 2))
+        // Balance bien lisible : libellé, poids en grand, bouton Tarer.
+        val scale = Ui.horizontal(c)
+        scale.setPadding(Ui.u(16), Ui.u(9), Ui.u(9), Ui.u(9))
+        scale.background = Ui.round(Ui.BG, 18f)
+        val sc = Ui.vertical(c)
+        sc.addView(Ui.text(c, tr("Balance").uppercase(), 10f, Ui.TEXT2, Ui.HEADING).apply { letterSpacing = 0.06f })
+        weight = Ui.text(c, "", 25f, Ui.TEXT, Ui.HEADING).apply { letterSpacing = -0.02f }
+        sc.addView(weight, Ui.lp(t = 1))
+        scale.addView(sc, LinearLayout.LayoutParams(0, Ui.WRAP, 1f))
+        scale.addView(Ui.button(c, tr("Tarer"), Ui.Style.PRIMARY, height = 42, textSize = 13f) { a.machine.tare() })
+        right.addView(scale, Ui.lp(Ui.MATCH, Ui.WRAP, t = 10))
+        accRow = Ui.horizontal(c, Gravity.CENTER)
+        right.addView(accRow, Ui.lp(Ui.MATCH, Ui.WRAP, t = 8))
+        main.addView(right, LinearLayout.LayoutParams(Ui.u(304), Ui.MATCH))
+        root.addView(main, LinearLayout.LayoutParams(Ui.MATCH, 0, 1f))
+
+        val foot = Ui.horizontal(c)
+        revBtn = Ui.button(c, tr("Sens inverse"), Ui.Style.SECONDARY, Icon.Kind.REVERSE, height = 58, textSize = 13f) { setReverse(!reverse) }
+        foot.addView(revBtn)
+        turbo = HoldButton(c, tr("Maintenir pour Turbo"), onDown = {
+            a.machine.turboDown(accessory) { v -> if (!v.ok) a.refusal(v) }
+        }, onUp = { a.machine.turboUp() })
+        foot.addView(turbo, Ui.lp(Ui.WRAP, Ui.u(58), l = 10))
+        startBtn = Ui.button(c, tr("Démarrer"), Ui.Style.PRIMARY, Icon.Kind.PLAY, height = 58, textSize = 16f) { start() }
+        foot.addView(startBtn, LinearLayout.LayoutParams(0, Ui.WRAP, 1f).apply { leftMargin = Ui.u(10) })
+        root.addView(foot, Ui.lp(Ui.MATCH, Ui.WRAP, t = 11))
         refresh()
         return root
     }
@@ -236,6 +234,7 @@ class ManualScreen(a: MainActivity, preset: app.toque.core.recipes.StepMachine? 
     )
 
     private fun start() {
+        if (a.dockJustMoved()) return
         val s = a.snapshot
         if (s.state == JobState.PAUSED && s.kind?.name == "MANUAL") {
             a.machine.resume(s.hotBlendConfirmed) { a.refusal(it) }
@@ -261,64 +260,58 @@ class ManualScreen(a: MainActivity, preset: app.toque.core.recipes.StepMachine? 
         }
     }
 
-    private fun refresh() {
-        val maxS = if (speed > 6) tr("max 15 min") else tr("max 99 min")
-        timeCard.set(Ui.clock(seconds * 1000L), "", maxS)
-        if (tempLevel == 0) tempCard.set("—", "", tr("Sans chauffe"), Ui.TEXT2)
-        else {
-            val t = TemperatureTable.current.celsius(tempLevel)
-            tempCard.set("$t", "°C", if (t >= 100) tr("Ébullition") else if (t >= 60) tr("Cuisson") else tr("Tiédir"), Ui.tempColor(t))
-        }
-        tempScale.level = tempLevel
-        speedCard.set("$speed", "", when (speed) {
-            1 -> tr("Mijoter")
-            2, 3 -> tr("Mélanger")
-            in 4..6 -> tr("Hacher")
-            else -> tr("Mixer")
-        } + if (reverse) " · " + tr("inverse") else "")
-        speedBar.level = speed
-        speedBar.max = speedMax().first
-        timeCard.select(selected == 0)
-        tempCard.select(selected == 1)
-        speedCard.select(selected == 2)
+    private fun maxSeconds() = ((if (speed > 6) Limits.MAX_MS_HIGH_SPEED else Limits.MAX_MS_DEFAULT) / 1000).toInt()
 
-        dirRow.removeAllViews()
-        dirRow.addView(Ui.segmented(c, listOf(Icon.Kind.FORWARD to tr("Normal"), Icon.Kind.REVERSE to tr("Inverse")), if (reverse) 1 else 0, 42) { i ->
-            setReverse(i == 1)
-        })
+    private fun refreshWheels() {
+        wMin.labels = (0..maxSeconds() / 60).map { String.format("%02d", it) }
+        wMin.set(seconds / 60)
+        wSec.set((seconds % 60) / 5)
+        val table = TemperatureTable.current
+        wTemp.labels = tempSteps.map { if (it == 0) "—" else "${table.celsius(it)}°" }
+        wTemp.set(tempSteps.indexOf(tempLevel).coerceAtLeast(0))
+        wSpeed.labels = (1..10).map { it.toString() }
+        wSpeed.set(speed - 1)
+    }
+
+    private fun refresh() {
+        refreshWheels()
+        revBtn.background = Ui.pressable(Ui.round(if (reverse) Ui.INK else Ui.SURFACE, 29f), 29f)
+        Ui.buttonText(revBtn)?.setTextColor(if (reverse) Ui.ON_INK else Ui.TEXT)
+        Ui.buttonIcon(revBtn)?.color = if (reverse) Ui.ON_INK else Ui.TEXT
         accRow.removeAllViews()
         accRow.addView(Ui.segmented(c, listOf(Icon.Kind.BLADE to Accessory.BLADE.label, Icon.Kind.WHISK to Accessory.WHISK.label),
-            if (accessory == Accessory.WHISK) 1 else 0, 42) { i -> setAccessory(if (i == 1) Accessory.WHISK else Accessory.BLADE) })
-
+            if (accessory == Accessory.WHISK) 1 else 0, 34) { i -> setAccessory(if (i == 1) Accessory.WHISK else Accessory.BLADE) })
+        refreshHintOnly()
         val v = SafetyPolicy.checkJob(spec(), if (a.snapshot.hasSample) a.snapshot.actualTempC else null)
             .filter { it.code != SafetyPolicy.HOT_BLEND }
-        hint.text = v.firstOrNull()?.message ?: if (a.snapshot.hot && speed >= 4) tr("Contenu chaud : confirmation demandée") else ""
         Ui.setButtonEnabled(startBtn, v.isEmpty())
     }
 
     override fun onSnapshot(s: Snapshot) {
-        val target = if (s.jobActive && s.jobTempLevel > 0) TemperatureTable.current.celsius(s.jobTempLevel) else
-            if (tempLevel > 0) TemperatureTable.current.celsius(tempLevel) else 0
+        val heating = s.hasSample && (s.actualTempC >= 40 || (s.jobActive && s.jobTempLevel > 0))
+        val state = when {
+            !s.hasSample -> "couvercle"
+            s.lidOpen -> "vide"
+            heating -> "chauffe"
+            else -> "couvercle"
+        }
+        if (bowl.tag != state) { bowl.tag = state; bowl.setImageBitmap(Ui.bowlBitmap(c, state)) }
         val cold = s.hasSample && s.actualTempC < 37 && a.isSmart()
-        ring.set(if (s.hasSample) s.actualTempC else 0, target,
-            when { !s.hasSample -> "—"; cold -> tr("froid"); else -> "${s.actualTempC}°" },
-            when { !s.hasSample -> tr("base non connectée"); cold -> tr("moins de 37 °C"); target > 0 -> tr("consigne %d °C", target); else -> tr("mesuré") })
+        caption.text = when {
+            !s.hasSample -> tr("Base non connectée")
+            else -> (if (cold) tr("Bol à moins de 37 °C") else tr("Bol à %d °C", s.actualTempC)) + " · " +
+                (if (s.lidOpen) tr("couvercle ouvert") else tr("couvercle fermé"))
+        }
         weight.text = if (s.hasSample) "${s.weightG} g" else "—"
-        lid.text = if (!s.hasSample) "—" else if (s.lidOpen) tr("Ouvert") else tr("Fermé")
-        lid.setTextColor(if (s.hasSample && s.lidOpen) Ui.WARN else if (s.hasSample) Ui.OK else Ui.TEXT2)
         val manualJob = s.kind?.name == "MANUAL" && (s.state == JobState.RUNNING || s.state == JobState.STARTING || s.state == JobState.PAUSED)
         live = manualJob && s.state != JobState.PAUSED
-        tempCard.repeatEnabled = !live
-        speedCard.repeatEnabled = !live
-        // Pendant la cuisson, vitesse et température ne changent qu'avec + et − (pas de saut d'un appui sur la barre).
-        speedBar.isEnabled = !live
-        tempScale.isEnabled = !live
+        // Pendant la cuisson, la température et la vitesse se changent cran par cran (molette du robot ou glisser).
         if (live && !pendingEdit) {
-            // Pendant la cuisson, la carte Durée affiche le temps restant.
             val remaining = ((s.remainingMs + 999) / 1000).toInt().coerceAtLeast(1)
             if (remaining != seconds) {
                 seconds = remaining
-                timeCard.set(Ui.clock(seconds * 1000L), "", tr("restant"))
+                wMin.set(seconds / 60)
+                wSec.set((seconds % 60) / 5)
             }
         }
         if (wasLive && !live && !manualJob) {
@@ -331,14 +324,22 @@ class ManualScreen(a: MainActivity, preset: app.toque.core.recipes.StepMachine? 
         Ui.buttonText(startBtn)?.text = if (s.state == JobState.PAUSED && manualJob) tr("Reprendre") else tr("Démarrer")
         turbo.isEnabled = !busy || s.turboActive
         turbo.alpha = if (turbo.isEnabled) 1f else 0.35f
-        if (live) hint.text = tr("Réglages appliqués en direct")
+        if (live) { hint.text = tr("Réglages appliqués en direct"); hint.background = Ui.round(Ui.OK_SOFT, 13f); hint.setTextColor(Ui.OK) }
         else if (!busy) refreshHintOnly()
     }
 
     private fun refreshHintOnly() {
         val v = SafetyPolicy.checkJob(spec(), if (a.snapshot.hasSample) a.snapshot.actualTempC else null)
             .filter { it.code != SafetyPolicy.HOT_BLEND }
-        hint.text = v.firstOrNull()?.message ?: if (a.snapshot.hot && speed >= 4) tr("Contenu chaud : confirmation demandée") else ""
+        val limited = (tempLevel > 0 || reverse) && speed >= Limits.MAX_SPEED_HEATED
+        hint.text = v.firstOrNull()?.message ?: when {
+            a.snapshot.hot && speed >= 4 -> tr("Contenu chaud : confirmation demandée")
+            limited -> tr("En chauffe ou en sens inverse, la vitesse est limitée à %d.", Limits.MAX_SPEED_HEATED)
+            else -> ""
+        }
+        hint.background = if (hint.text.isEmpty()) null else Ui.round(Ui.ACCENT_SOFT, 13f)
+        hint.setTextColor(Ui.ACCENT)
+        hint.visibility = if (hint.text.isEmpty()) View.INVISIBLE else View.VISIBLE
     }
 
     override fun onKnob(delta: Int): Boolean {

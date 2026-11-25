@@ -23,6 +23,8 @@ import app.toque.Prefs
 import app.toque.core.i18n.I18n
 import app.toque.core.i18n.tr
 import app.toque.core.recipes.Cookidoo
+import app.toque.core.recipes.Cookomix
+import app.toque.core.recipes.RecipeSource
 import app.toque.core.recipes.RecipeFilter
 import app.toque.core.recipes.SearchIndex
 import app.toque.ui.Icon
@@ -53,7 +55,7 @@ class RecipesScreen(
     }
     override val section = if (thermomix) Section.THERMOMIX else Section.RECIPES
 
-    private val base = if (thermomix) RecipeFilter(idPrefix = Cookidoo.ID_PREFIX) else RecipeFilter(excludePrefix = Cookidoo.ID_PREFIX)
+    private val base = if (thermomix) RecipeFilter(idPrefix = Cookidoo.ID_PREFIX) else RecipeFilter()
     private var filter = base.copy(favoritesOnly = favorites)
     private var query = ""
     private var results: List<SearchIndex.Hit> = emptyList()
@@ -71,19 +73,20 @@ class RecipesScreen(
 
     override fun build(): View {
         val root = Ui.vertical(c)
-        root.setPadding(Ui.u(24), Ui.u(2), Ui.u(22), 0)
+        root.setPadding(Ui.u(26), Ui.u(2), Ui.u(26), 0)
 
+        // En-tête v2 : recherche en pilule blanche, puis le bouton noir « Importer ».
         val bar = Ui.horizontal(c)
         val field = Ui.horizontal(c)
-        field.setPadding(Ui.u(20), 0, Ui.u(8), 0)
-        field.background = Ui.round(Ui.SURFACE, 29f)
-        Ui.lift(field, 2f)
-        field.addView(Icon(c, Icon.Kind.SEARCH, Ui.TEXT2).apply { strokeWidth = 2.1f }, LinearLayout.LayoutParams(Ui.u(23), Ui.u(23)).apply { rightMargin = Ui.u(12) })
+        field.setPadding(Ui.u(18), 0, Ui.u(8), 0)
+        field.background = Ui.round(Ui.SURFACE, 24f)
+        field.addView(Icon(c, Icon.Kind.SEARCH, Ui.TEXT2).apply { strokeWidth = 2.2f }, LinearLayout.LayoutParams(Ui.u(18), Ui.u(18)).apply { rightMargin = Ui.u(10) })
         input = EditText(c).apply {
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, Ui.uf(18.5f))
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, Ui.uf(14.5f))
             setTextColor(Ui.TEXT)
             setHintTextColor(Ui.TEXT3)
-            hint = tr("Recette, ingrédient… (ex. : poulet, curry)")
+            typeface = Ui.REGULAR
+            hint = tr("Un plat, un ingrédient : poulet, courgette…")
             background = null
             setPadding(0, 0, 0, 0)
             setSingleLine()
@@ -110,22 +113,24 @@ class RecipesScreen(
         clear.tap { input.setText("") }
         clear.visibility = View.INVISIBLE
         field.addView(clear, LinearLayout.LayoutParams(Ui.u(40), Ui.u(40)))
-        bar.addView(field, LinearLayout.LayoutParams(0, Ui.u(58), 1f))
-        count = Ui.text(c, "", 15.5f, Ui.TEXT2)
-        bar.addView(count, Ui.lp(Ui.WRAP, Ui.WRAP, l = 16))
+        bar.addView(field, LinearLayout.LayoutParams(0, Ui.u(48), 1f))
+        count = Ui.text(c, "", 12f, Ui.TEXT2, Ui.MEDIUM)
+        bar.addView(count, Ui.lp(Ui.WRAP, Ui.WRAP, l = 14))
+        if (!thermomix) bar.addView(Ui.button(c, tr("Importer"), Ui.Style.PRIMARY, Icon.Kind.PLUS, height = 48, textSize = 13f) { a.push(ImportScreen(a)) },
+            Ui.lp(Ui.WRAP, Ui.WRAP, l = 14))
         root.addView(bar)
 
         val scroller = HorizontalScrollView(c).apply { isHorizontalScrollBarEnabled = false; overScrollMode = View.OVER_SCROLL_NEVER }
         chips = Ui.horizontal(c)
         chips.setPadding(0, Ui.u(2), 0, Ui.u(2))
         scroller.addView(chips)
-        root.addView(scroller, Ui.lp(t = 12, b = 12))
+        root.addView(scroller, Ui.lp(t = 12, b = 13))
 
         val body = FrameLayout(c)
         grid = GridView(c).apply {
-            numColumns = 4
-            horizontalSpacing = Ui.u(14)
-            verticalSpacing = Ui.u(14)
+            numColumns = 3
+            horizontalSpacing = Ui.u(13)
+            verticalSpacing = Ui.u(13)
             stretchMode = GridView.STRETCH_COLUMN_WIDTH
             selector = android.graphics.drawable.ColorDrawable(0)
             isVerticalScrollBarEnabled = false
@@ -175,6 +180,14 @@ class RecipesScreen(
             chips.addView(Ui.toggleChip(c, label, selected, icon) { filter = f; buildChips(); search() }, Ui.lp(Ui.WRAP, Ui.WRAP, r = 9))
         }
         chip(tr("Toutes"), filter == base, base)
+        if (!thermomix) {
+            val lidl = base.copy(source = RecipeSource.IMPORTED, excludePrefix = Cookidoo.ID_PREFIX)
+            val ck = base.copy(idPrefix = Cookomix.ID_PREFIX)
+            val mine = base.copy(source = RecipeSource.USER, excludePrefix = Cookomix.ID_PREFIX)
+            chip("Lidl", filter == lidl, lidl)
+            chip("Cookomix", filter == ck, ck)
+            chip(tr("Mes recettes"), filter == mine, mine)
+        }
         chip(tr("Favoris"), filter.favoritesOnly, base.copy(favoritesOnly = true), Icon.Kind.STAR)
         chip(tr("30 min max"), filter.maxMinutes == 30, base.copy(maxMinutes = 30), Icon.Kind.CLOCK)
         for (cat in a.app.recipes.index.categories(base).take(30)) chip(cat, filter.category == cat, base.copy(category = cat))
@@ -238,7 +251,7 @@ class RecipesScreen(
         override fun getItemId(position: Int) = position.toLong()
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-            val card = (convertView as? RecipeCard) ?: RecipeCard(c, 104).apply {
+            val card = (convertView as? RecipeCard) ?: RecipeCard(c, 202).apply {
                 layoutParams = AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, AbsListView.LayoutParams.WRAP_CONTENT)
             }
             val e = results[position].entry

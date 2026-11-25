@@ -21,6 +21,8 @@ class ToqueApp : Application() {
         private set
     val machine: MachineClient by lazy { MachineClient(this) }
     val recipes: RecipeRepo by lazy { RecipeRepo(this) }
+    /** Import de recettes Cookomix envoyées depuis le téléphone (port 8766, réseau local). */
+    val importServer: app.toque.recipes.ImportServer by lazy { app.toque.recipes.ImportServer(app.toque.recipes.CookomixImport(recipes)) }
     /** Dernière anomalie du compilateur repérée (vide si aucune) : affichée par l'interface. */
     @Volatile var compilerProblem = ""
     val compilerWatch: CompilerWatch by lazy { CompilerWatch(log) { what -> compilerProblem = what; compilerListener?.invoke(what) } }

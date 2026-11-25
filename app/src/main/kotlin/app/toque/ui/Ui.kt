@@ -68,6 +68,11 @@ object Ui {
     var DOCK_TEXT2 = 0; private set
     var DOCK_SURFACE = 0; private set
     var RIPPLE = 0; private set
+    /** Boutons principaux (noir en clair, orange en sombre) et leur texte. */
+    var INK = 0; private set
+    var ON_INK = 0; private set
+    /** Orange vif de la chaleur (barres de progression, vagues de chauffe). */
+    var HEAT = 0; private set
 
     /** Ancien nom de [ACCENT_SOFT]. */
     val ACCENT_DIM: Int get() = ACCENT_SOFT
@@ -81,14 +86,16 @@ object Ui {
     fun apply(t: Theme) {
         theme = if (t == Theme.AUTO) Theme.DARK else t
         if (theme == Theme.LIGHT) {
-            BG = c(0xFFF5EFE6); RAIL = c(0xFFEBE2D4); SURFACE = c(0xFFFFFCF8); SURFACE2 = c(0xFFEFE6D9); SURFACE3 = c(0xFFE3D7C6)
-            STROKE = c(0xFFE0D3C1); TEXT = c(0xFF2B211A); TEXT2 = c(0xFF65574B); TEXT3 = c(0xFF857669)
-            ACCENT = c(0xFFB4532F); ACCENT_SOFT = c(0xFFF3DED3); ON_ACCENT = Color.WHITE
-            COOL = c(0xFF2C766A); COOL_SOFT = c(0xFFD9ECE7); ON_COOL = Color.WHITE
-            OK = c(0xFF2E7D4F); OK_SOFT = c(0xFFDCEFE2); WARN = c(0xFF94600F); WARN_SOFT = c(0xFFF6E7C8)
+            // Design v2 : clair, sobre, encre presque noire ; orange réservé à la chaleur, bleu à la vitesse.
+            BG = c(0xFFF6F5F2); RAIL = c(0xFFFFFFFF); SURFACE = c(0xFFFFFFFF); SURFACE2 = c(0xFFEFEEEA); SURFACE3 = c(0xFFE4E2DC)
+            STROKE = c(0xFFE4E2DC); TEXT = c(0xFF121212); TEXT2 = c(0xFF5E5B55); TEXT3 = c(0xFF8C8880)
+            ACCENT = c(0xFFB8410F); ACCENT_SOFT = c(0xFFFDECE3); ON_ACCENT = Color.WHITE
+            COOL = c(0xFF2453C9); COOL_SOFT = c(0xFFE7EDFB); ON_COOL = Color.WHITE
+            OK = c(0xFF2E7D4F); OK_SOFT = c(0xFFE4EFE8); WARN = c(0xFF94600F); WARN_SOFT = c(0xFFF6E7C8)
             DANGER = c(0xFFB83A2E); DANGER_SOFT = c(0xFFF7DCD8); ON_DANGER = Color.WHITE
-            SCRIM = c(0x992B211A); DOCK = c(0xFF2B211A); DOCK_TEXT = c(0xFFF7F1E8); DOCK_TEXT2 = c(0xFFCBBFB2); DOCK_SURFACE = c(0xFF43372D)
-            RIPPLE = c(0x222B211A)
+            SCRIM = c(0x99121212); DOCK = c(0xFF121212); DOCK_TEXT = c(0xFFFFFFFF); DOCK_TEXT2 = c(0xFFB9B6AE); DOCK_SURFACE = c(0xFF2C2B29)
+            RIPPLE = c(0x22121212)
+            INK = c(0xFF121212); ON_INK = Color.WHITE; HEAT = c(0xFFE0551F)
         } else {
             BG = c(0xFF13110F); RAIL = c(0xFF0D0C0A); SURFACE = c(0xFF1D1A17); SURFACE2 = c(0xFF28241F); SURFACE3 = c(0xFF342E28)
             STROKE = c(0xFF3A332C); TEXT = c(0xFFF3ECE3); TEXT2 = c(0xFFB6AB9E); TEXT3 = c(0xFF8C8175)
@@ -98,6 +105,7 @@ object Ui {
             DANGER = c(0xFFF06A5E); DANGER_SOFT = c(0xFF3D1D1A); ON_DANGER = c(0xFF2A0F0C)
             SCRIM = c(0xCC000000); DOCK = c(0xFF2A2520); DOCK_TEXT = c(0xFFF3ECE3); DOCK_TEXT2 = c(0xFFB6AB9E); DOCK_SURFACE = c(0xFF3B342D)
             RIPPLE = c(0x33FFFFFF)
+            INK = ACCENT; ON_INK = ON_ACCENT; HEAT = ACCENT
         }
     }
 
@@ -118,6 +126,8 @@ object Ui {
     /** Marque Camybrith Cooking : Poppins (licence SIL OFL, voir assets/fonts/OFL.txt). */
     var BRAND_BOLD: Typeface = Typeface.DEFAULT_BOLD; private set
     var BRAND_LIGHT: Typeface = Typeface.create("sans-serif-light", Typeface.NORMAL); private set
+    /** Titres du design v2 : Manrope ExtraBold, interlettrage resserré. */
+    var HEADING: Typeface = Typeface.DEFAULT_BOLD; private set
 
     /** Facteur d'échelle : 1 unité = 1 px sur un écran 1024×600. */
     var scale = 1f
@@ -134,9 +144,16 @@ object Ui {
         } catch (_: Exception) {
             fallback
         }
+        // Manrope (licence SIL OFL, voir assets/fonts/OFL-Manrope.txt) : instances fixes tirées de la
+        // police variable officielle, car Android 8 espace mal les lettres d'une police variable.
         SERIF = font("DMSerifDisplay-Regular", Typeface.SERIF)
         BRAND_BOLD = font("Poppins-Bold", Typeface.DEFAULT_BOLD)
         BRAND_LIGHT = font("Poppins-Light", Typeface.create("sans-serif-light", Typeface.NORMAL))
+        LIGHT = font("Manrope-500", LIGHT)
+        REGULAR = font("Manrope-500", REGULAR)
+        MEDIUM = font("Manrope-700", MEDIUM)
+        BOLD = font("Manrope-800", BOLD)
+        HEADING = font("Manrope-800", BOLD)
     }
 
     /** Son d'appui, branché par MainActivity selon les réglages. */
@@ -171,9 +188,9 @@ object Ui {
             includeFontPadding = false
         }
 
-    /** Titre en DM Serif Display. */
+    /** Titre : Manrope ExtraBold (design v2). */
     fun title(c: Context, s: CharSequence = "", size: Float = 28f, color: Int = TEXT): TextView =
-        text(c, s, size, color, SERIF).apply { includeFontPadding = true }
+        text(c, s, size, color, HEADING).apply { includeFontPadding = true; letterSpacing = -0.02f }
 
     /** Petit intitulé en capitales espacées. */
     fun label(c: Context, s: String, color: Int = TEXT2, size: Float = 13f): TextView =
@@ -236,7 +253,7 @@ object Ui {
     fun button(c: Context, label: String, style: Style = Style.SECONDARY, icon: Icon.Kind? = null,
                height: Int = 56, textSize: Float = 18f, iconAfter: Boolean = false, onClick: (View) -> Unit): LinearLayout {
         val (bg, fg) = when (style) {
-            Style.PRIMARY -> ACCENT to ON_ACCENT
+            Style.PRIMARY -> INK to ON_INK
             Style.SECONDARY -> SURFACE2 to TEXT
             Style.DANGER -> DANGER to ON_DANGER
             Style.GHOST -> Color.TRANSPARENT to TEXT2
@@ -292,14 +309,14 @@ object Ui {
     fun chipIcon(chip: LinearLayout): Icon? = chip.getChildAt(0) as? Icon
 
     /** Puce sélectionnable (filtres, choix) : pleine quand elle est choisie. */
-    fun toggleChip(c: Context, label: String, selected: Boolean, icon: Icon.Kind? = null, onClick: () -> Unit): LinearLayout {
-        val fg = if (selected) BG else TEXT
+    fun toggleChip(c: Context, label: String, selected: Boolean, icon: Icon.Kind? = null, idle: Int = SURFACE, onClick: () -> Unit): LinearLayout {
+        val fg = if (selected) ON_INK else TEXT
         val row = horizontal(c, Gravity.CENTER)
-        row.setPadding(u(17), 0, u(17), 0)
-        row.minimumHeight = u(42)
-        row.background = pressable(if (selected) round(TEXT, 40f) else round(SURFACE, 40f, STROKE, 1.2f), 40f)
-        if (icon != null) row.addView(Icon(c, icon, fg), LinearLayout.LayoutParams(u(18), u(18)).apply { rightMargin = u(7) })
-        row.addView(text(c, label, 16f, fg, MEDIUM))
+        row.setPadding(u(16), 0, u(16), 0)
+        row.minimumHeight = u(37)
+        row.background = pressable(round(if (selected) INK else idle, 40f), 40f)
+        if (icon != null) row.addView(Icon(c, icon, fg), LinearLayout.LayoutParams(u(15), u(15)).apply { rightMargin = u(7) })
+        row.addView(text(c, label, 12f, fg, MEDIUM))
         row.isClickable = true
         row.tap { onClick() }
         return row
@@ -334,10 +351,14 @@ object Ui {
     }
 
     /** Pastille ronde colorée portant une icône (en tête de carte). */
+    /**
+     * Icône d'en-tête. Design v2 : l'icône seule, au trait fin, sans pastille de couleur ; la couleur
+     * n'est gardée que pour les alertes (danger, avertissement).
+     */
     fun badge(c: Context, icon: Icon.Kind, color: Int = ACCENT, soft: Int = ACCENT_SOFT, size: Int = 46): FrameLayout {
         val f = FrameLayout(c)
-        f.background = round(soft, size * 0.36f)
-        f.addView(Icon(c, icon, color), flp(u(size * 0.55f), u(size * 0.55f), Gravity.CENTER))
+        val ink = if (color == DANGER || color == WARN) color else TEXT
+        f.addView(Icon(c, icon, ink).apply { strokeWidth = 1.5f }, flp(u(size * 0.7f), u(size * 0.7f), Gravity.CENTER))
         f.layoutParams = LinearLayout.LayoutParams(u(size), u(size))
         return f
     }
@@ -370,6 +391,36 @@ object Ui {
     }
 
     /** Couleur de repli stable pour une vignette de recette sans photo. */
+    /** Origine d'une recette et sa couleur : Lidl (encre), Cookomix (bleu), Thermomix, Mes recettes (vert). */
+    fun origin(id: String, source: app.toque.core.recipes.RecipeSource): Pair<String, Int> = when {
+        id.startsWith(app.toque.core.recipes.Cookomix.ID_PREFIX) -> "Cookomix" to COOL
+        id.startsWith(app.toque.core.recipes.Cookidoo.ID_PREFIX) -> "Thermomix" to TEXT2
+        source == app.toque.core.recipes.RecipeSource.USER -> app.toque.core.i18n.tr("Mes recettes") to OK
+        else -> "Lidl" to TEXT
+    }
+
+    /** Icône vectorielle au trait du design v2 (res/drawable), recolorée. */
+    fun vector(c: Context, res: Int, color: Int = TEXT): android.widget.ImageView = android.widget.ImageView(c).apply {
+        val d = c.resources.getDrawable(res, null).mutate()
+        d.setTint(color)
+        setImageDrawable(d)
+        scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+    }
+
+    fun tintVector(v: android.widget.ImageView, color: Int) { v.drawable?.setTint(color) }
+
+    private val bowlCache = HashMap<String, android.graphics.Bitmap>()
+
+    /** Rendu 3D du bol (assets/bol/<état>.png) : vide, chauffe, couvercle, sans-gobelet, vapeur, petrir… */
+    fun bowlBitmap(c: Context, state: String): android.graphics.Bitmap? = bowlCache[state] ?: try {
+        c.assets.open("bol/$state.png").use { android.graphics.BitmapFactory.decodeStream(it) }?.also { bowlCache[state] = it }
+    } catch (_: Exception) { null }
+
+    fun bowl(c: Context, state: String): android.widget.ImageView = android.widget.ImageView(c).apply {
+        scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+        setImageBitmap(bowlBitmap(c, state))
+    }
+
     fun placeholderColors(seed: String): IntArray {
         val palette = if (dark) intArrayOf(
             0xFF4A3424.toInt(), 0xFF3F3A26.toInt(), 0xFF2E3A2C.toInt(), 0xFF47302B.toInt(),

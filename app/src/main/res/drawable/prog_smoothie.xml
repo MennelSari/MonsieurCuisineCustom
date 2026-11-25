@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icône au trait du design v2 (Smoothie), recolorée par le code. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:pathData="M6.5 7.5h11L16 20.5H8zM7 11.5h10M13 7.5l1.8-4.5h2.7" android:fillColor="#00000000" android:strokeColor="#FF121212"
+        android:strokeWidth="1.4" android:strokeLineCap="round" android:strokeLineJoin="round" />
+</vector>

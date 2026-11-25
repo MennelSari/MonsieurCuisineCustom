@@ -1,0 +1,11 @@
+# Injecté dans init.rc par magiskinit (overlay.d). Lance /mcroot.sh en root une fois le démarrage terminé.
+# Le script est à la racine du ramdisk : sur ce robot (rootfs), Magisk remplace /sbin au démarrage.
+service mcroot /system/bin/sh /mcroot.sh ${MAGISKTMP}
+    user root
+    group root
+    seclabel u:r:magisk:s0
+    oneshot
+    disabled
+
+on property:sys.boot_completed=1
+    start mcroot

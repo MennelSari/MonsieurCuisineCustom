@@ -19,6 +19,7 @@ import app.toque.ui.MainActivity
 import app.toque.ui.Screen
 import app.toque.ui.Section
 import app.toque.ui.Ui
+import app.toque.ui.tap
 
 /** Fiche recette : photo et actions à gauche ; ingrédients, étapes et avis à droite, en onglets. */
 class RecipeScreen(a: MainActivity, private val recipe: Recipe) : Screen(a) {
@@ -32,73 +33,109 @@ class RecipeScreen(a: MainActivity, private val recipe: Recipe) : Screen(a) {
     private var tab = 0
     private val panes = HashMap<Int, View>()
 
+    override val showTopBar = false
+
+    /**
+     * Fiche du design v2 : la photo pleine hauteur à gauche (retour, favori, modifier, origine),
+     * à droite le titre, quatre repères (préparation, total, difficulté, portions), les ingrédients
+     * en colonnes (ou les étapes, ou les avis) et le grand bouton « Cuisiner pas à pas ».
+     */
     override fun build(): View {
         val root = Ui.horizontal(c, Gravity.TOP)
-        root.setPadding(Ui.u(24), Ui.u(4), Ui.u(22), Ui.u(18))
+        root.setPadding(Ui.u(16), Ui.u(16), Ui.u(16), Ui.u(4))
 
-        // ---- colonne gauche
-        val left = Ui.vertical(c)
-        val header = FrameLayout(c)
-        header.background = Ui.gradient(Ui.placeholderColors(recipe.title), 22f)
-        header.addView(Icon(c, Icon.Kind.PLATE, Ui.placeholderInk).apply { strokeWidth = 1.2f }, Ui.flp(Ui.u(70), Ui.u(70), Gravity.CENTER))
+        // ---- photo
+        val photo = FrameLayout(c)
+        photo.background = Ui.gradient(Ui.placeholderColors(recipe.title), 26f)
+        photo.clipToOutline = true
         val img = ImageView(c).apply { scaleType = ImageView.ScaleType.CENTER_CROP }
-        header.addView(img, Ui.flp())
-        header.clipToOutline = true
-        header.outlineProvider = object : android.view.ViewOutlineProvider() {
-            override fun getOutline(view: View, outline: android.graphics.Outline) =
-                outline.setRoundRect(0, 0, view.width, view.height, Ui.uf(22f))
+        photo.addView(img, Ui.flp())
+        ImageLoader.load(img, a.app.recipes.imageFile(recipe.image), Ui.u(520))
+        val top = Ui.horizontal(c)
+        top.addView(circle(Icon.Kind.BACK, tr("Retour")) { a.back() })
+        top.addView(View(c), LinearLayout.LayoutParams(0, 1, 1f))
+        favButton = circle(Icon.Kind.STAR, tr("Favori")) { toggleFavorite() }
+        top.addView(favButton)
+        if (recipe.source == app.toque.core.recipes.RecipeSource.USER)
+            top.addView(circle(Icon.Kind.PEN, tr("Modifier la recette")) { a.push(EditorScreen(a, recipe)) }, LinearLayout.LayoutParams(Ui.u(45), Ui.u(45)).apply { leftMargin = Ui.u(8) })
+        photo.addView(top, Ui.flp(Ui.MATCH, Ui.WRAP, Gravity.TOP).apply { setMargins(Ui.u(16), Ui.u(16), Ui.u(16), 0) })
+        val (origin, originColor) = Ui.origin(recipe.id, recipe.source)
+        val originText = when (origin) {
+            "Cookomix" -> tr("Importée de Cookomix")
+            "Lidl" -> tr("Recette Lidl")
+            "Thermomix" -> tr("Recette Thermomix convertie")
+            else -> tr("Ma recette")
         }
-        ImageLoader.load(img, a.app.recipes.imageFile(recipe.image), Ui.u(420))
-        left.addView(header, LinearLayout.LayoutParams(Ui.MATCH, 0, 1f))
+        val chip = Ui.text(c, originText, 11.5f, originColor, Ui.HEADING)
+        chip.setPadding(Ui.u(12), Ui.u(7), Ui.u(12), Ui.u(7))
+        chip.background = Ui.round(0xE6FFFFFF.toInt(), 11f)
+        photo.addView(chip, Ui.flp(Ui.WRAP, Ui.WRAP, Gravity.BOTTOM or Gravity.START).apply { setMargins(Ui.u(16), 0, 0, Ui.u(16)) })
+        root.addView(photo, LinearLayout.LayoutParams(Ui.u(416), Ui.MATCH).apply { rightMargin = Ui.u(16) })
 
-        val meta = Ui.horizontal(c)
-        if (recipe.totalMinutes > 0) meta.addView(Ui.chip(c, Ui.minutes(recipe.totalMinutes), Icon.Kind.CLOCK), Ui.lp(Ui.WRAP, Ui.WRAP, r = 7))
-        if (recipe.servings > 0) meta.addView(Ui.chip(c, tr("%d pers.", recipe.servings), Icon.Kind.PLATE), Ui.lp(Ui.WRAP, Ui.WRAP, r = 7))
-        meta.addView(Ui.chip(c, when (recipe.difficulty) { 1 -> tr("Facile"); 2 -> tr("Moyen"); else -> tr("Difficile") }, Icon.Kind.STAR))
-        left.addView(meta, Ui.lp(t = 12))
-
-        // Auteur et note du site.
-        val byline = ArrayList<String>()
-        if (recipe.author.isNotBlank()) byline += tr("Par %s", authorName(recipe.author))
-        if (recipe.ratingCount > 0) byline += "★ " + tr("%s/5 · %d notes", rating(recipe.rating), recipe.ratingCount)
-        if (byline.isNotEmpty()) {
-            left.addView(Ui.ellipsize(Ui.text(c, byline.joinToString("   "), 14.5f, Ui.TEXT2)), Ui.lp(t = 10))
-        }
-
-        val actions = Ui.horizontal(c)
-        actions.addView(Ui.button(c, tr("Cuisiner"), Ui.Style.PRIMARY, Icon.Kind.PLAY, height = 60, textSize = 20f) {
-            a.push(CookScreen(a, recipe, 0))
-        }, LinearLayout.LayoutParams(0, Ui.WRAP, 1f).apply { rightMargin = Ui.u(10) })
-        favButton = Ui.button(c, "", Ui.Style.SECONDARY, Icon.Kind.STAR, height = 60, textSize = 22f) { toggleFavorite() }
-        favButton.contentDescription = tr("Favori")
-        actions.addView(favButton)
-        left.addView(actions, Ui.lp(t = 14))
-        root.addView(left, LinearLayout.LayoutParams(0, Ui.MATCH, 0.4f).apply { rightMargin = Ui.u(20) })
-
-        // ---- colonne droite : onglets
+        // ---- texte
         val right = Ui.vertical(c)
-        tabs = FrameLayout(c)
-        right.addView(tabs, Ui.lp(Ui.WRAP, Ui.WRAP))
+        right.setPadding(Ui.u(3), Ui.u(8), Ui.u(6), 0)
+        right.addView(Ui.ellipsize(Ui.text(c, recipe.title, 28f, Ui.TEXT, Ui.HEADING).apply { letterSpacing = -0.03f; setLineSpacing(0f, 1.05f) }, 2))
+        val facts = Ui.horizontal(c)
+        fun fact(label: String, value: String) {
+            val f = Ui.vertical(c)
+            f.setPadding(Ui.u(13), Ui.u(10), Ui.u(13), Ui.u(10))
+            f.background = Ui.round(Ui.SURFACE, 16f)
+            f.addView(Ui.text(c, label, 10.5f, Ui.TEXT2, Ui.MEDIUM))
+            f.addView(Ui.ellipsize(Ui.text(c, value, 17.5f, Ui.TEXT, Ui.HEADING)), Ui.lp(t = 2))
+            facts.addView(f, LinearLayout.LayoutParams(0, Ui.WRAP, 1f).apply { if (facts.childCount > 0) leftMargin = Ui.u(8) })
+        }
+        fact(tr("Préparation"), if (recipe.prepMinutes > 0) Ui.minutes(recipe.prepMinutes) else "—")
+        fact(tr("Total"), if (recipe.totalMinutes > 0) Ui.minutes(recipe.totalMinutes) else "—")
+        fact(tr("Difficulté"), when (recipe.difficulty) { 1 -> tr("Facile"); 2 -> tr("Moyen"); else -> tr("Difficile") })
+        fact(tr("Portions"), if (recipe.servings > 0) recipe.servings.toString() else "—")
+        right.addView(facts, Ui.lp(t = 14))
+
         pane = FrameLayout(c)
-        pane.background = Ui.round(Ui.SURFACE, 22f)
-        Ui.lift(pane)
-        right.addView(pane, LinearLayout.LayoutParams(Ui.MATCH, 0, 1f).apply { topMargin = Ui.u(12) })
-        root.addView(right, LinearLayout.LayoutParams(0, Ui.MATCH, 0.6f))
+        pane.background = Ui.round(Ui.SURFACE, 21f)
+        val card = Ui.vertical(c)
+        val head = Ui.horizontal(c)
+        head.setPadding(Ui.u(19), Ui.u(15), Ui.u(15), 0)
+        tabs = FrameLayout(c)
+        head.addView(tabs, LinearLayout.LayoutParams(0, Ui.WRAP, 1f))
+        val machines = recipe.machineSteps
+        head.addView(Ui.text(c, tr("%d étapes · %d réglages machine", recipe.steps.size, machines), 11.5f, Ui.TEXT2, Ui.MEDIUM))
+        card.addView(head)
+        card.addView(pane, LinearLayout.LayoutParams(Ui.MATCH, 0, 1f))
+        card.background = Ui.round(Ui.SURFACE, 21f)
+        pane.background = null
+        right.addView(card, LinearLayout.LayoutParams(Ui.MATCH, 0, 1f).apply { topMargin = Ui.u(14) })
+        right.addView(Ui.button(c, tr("Cuisiner pas à pas"), Ui.Style.PRIMARY, Icon.Kind.PLAY, height = 61, textSize = 16f) {
+            a.push(CookScreen(a, recipe, 0))
+        }, Ui.lp(Ui.MATCH, Ui.WRAP, t = 14))
+        root.addView(right, LinearLayout.LayoutParams(0, Ui.MATCH, 1f))
         showTab(if (recipe.ingredients.isEmpty()) 1 else 0)
         refreshFavorite()
         return root
+    }
+
+    /** Bouton rond blanc posé sur la photo. */
+    private fun circle(icon: Icon.Kind, label: String, onClick: () -> Unit): LinearLayout {
+        val b = Ui.horizontal(c, Gravity.CENTER)
+        b.background = Ui.pressable(Ui.round(Ui.SURFACE, 22.5f), 22.5f)
+        b.addView(Icon(c, icon, Ui.TEXT).apply { strokeWidth = 2.2f }, LinearLayout.LayoutParams(Ui.u(18), Ui.u(18)))
+        b.layoutParams = LinearLayout.LayoutParams(Ui.u(45), Ui.u(45))
+        b.isClickable = true
+        b.contentDescription = label
+        b.tap { onClick() }
+        return b
     }
 
     private fun showTab(i: Int) {
         tab = i
         tabs.removeAllViews()
         val opts = mutableListOf<Pair<Icon.Kind?, String>>(
-            Icon.Kind.BOOK to tr("Ingrédients"),
-            Icon.Kind.POT to tr("Étapes (%d)", recipe.steps.size),
+            null to tr("Ingrédients"),
+            null to tr("Étapes"),
         )
         val withReviews = McOnline.apiIdOf(recipe.id) != null
-        if (withReviews) opts += Icon.Kind.STAR to tr("Avis")
-        tabs.addView(Ui.segmented(c, opts, i) { showTab(it) })
+        if (withReviews) opts += null to tr("Avis")
+        tabs.addView(Ui.segmented(c, opts, i, height = 36) { showTab(it) }, Ui.flp(Ui.WRAP, Ui.WRAP, Gravity.START))
         pane.removeAllViews()
         val v = panes.getOrPut(i) {
             when (i) {
@@ -111,27 +148,35 @@ class RecipeScreen(a: MainActivity, private val recipe: Recipe) : Screen(a) {
         pane.addView(v, Ui.flp())
     }
 
+    /** Ingrédients en trois colonnes : un groupe par colonne, ou la liste répartie également. */
     private fun ingredientsPane(): View {
-        val ing = Ui.vertical(c)
-        ing.setPadding(Ui.u(22), Ui.u(12), Ui.u(22), Ui.u(18))
-        for (g in recipe.ingredients) {
-            if (g.title.isNotBlank()) ing.addView(Ui.label(c, g.title, Ui.ACCENT, 12.5f), Ui.lp(t = 14, b = 2))
-            for (i in g.items) {
-                val row = Ui.horizontal(c, Gravity.CENTER_VERTICAL)
-                val col = Ingredients.lookup(i.name)?.color
-                val dot = View(c)
-                dot.background = if (col != null) Ui.round(col, 7f, Ui.shade(col, 0.72f), 1.2f) else Ui.round(0, 7f, Ui.TEXT3, 1.4f)
-                row.addView(dot, LinearLayout.LayoutParams(Ui.u(14), Ui.u(14)).apply { rightMargin = Ui.u(12) })
-                val qty = listOf(i.qty, i.unit).filter { it.isNotBlank() }.joinToString(" ")
-                if (qty.isNotEmpty()) row.addView(Ui.text(c, qty, 17f, Ui.TEXT, Ui.MEDIUM), Ui.lp(Ui.WRAP, Ui.WRAP, r = 8))
-                row.addView(Ui.text(c, i.name + if (i.note.isNotBlank()) ", " + i.note else "", 17f, Ui.TEXT).apply { setLineSpacing(0f, 1.1f) },
-                    LinearLayout.LayoutParams(0, Ui.WRAP, 1f))
-                ing.addView(row, Ui.lp(t = 10))
-                ing.addView(Ui.divider(c), Ui.lp(Ui.MATCH, Math.max(1, Ui.u(1)), t = 10))
+        val cols = Ui.horizontal(c, Gravity.TOP)
+        cols.setPadding(Ui.u(19), Ui.u(12), Ui.u(19), Ui.u(16))
+        val groups = recipe.ingredients.filter { it.items.isNotEmpty() }
+        val columns: List<Pair<String, List<app.toque.core.recipes.Ingredient>>> =
+            if (groups.size in 2..3) groups.map { it.title to it.items }
+            else {
+                val all = groups.flatMap { it.items }
+                val per = maxOf(1, (all.size + 2) / 3)
+                all.chunked(per).map { "" to it }
             }
+        for ((k, col) in columns.withIndex()) {
+            val v = Ui.vertical(c)
+            if (col.first.isNotBlank()) v.addView(Ui.text(c, col.first.uppercase(), 10f, Ui.TEXT2, Ui.HEADING).apply { letterSpacing = 0.06f }, Ui.lp(b = 4))
+            for (i in col.second) {
+                val row = Ui.horizontal(c, Gravity.TOP)
+                row.setPadding(0, Ui.u(7), 0, Ui.u(7))
+                val qty = listOf(i.qty, i.unit).filter { it.isNotBlank() }.joinToString(" ")
+                row.addView(Ui.text(c, qty, 12f, Ui.TEXT, Ui.HEADING), LinearLayout.LayoutParams(Ui.u(58), Ui.WRAP))
+                row.addView(Ui.text(c, i.name + if (i.note.isNotBlank()) ", " + i.note else "", 12f, Ui.TEXT, Ui.REGULAR).apply { setLineSpacing(0f, 1.15f) },
+                    LinearLayout.LayoutParams(0, Ui.WRAP, 1f))
+                v.addView(row)
+                v.addView(Ui.divider(c), Ui.lp(Ui.MATCH, Math.max(1, Ui.u(1))))
+            }
+            cols.addView(v, LinearLayout.LayoutParams(0, Ui.WRAP, 1f).apply { if (k > 0) leftMargin = Ui.u(16) })
         }
-        if (recipe.ingredients.isEmpty()) ing.addView(Ui.text(c, tr("Pas de liste d'ingrédients."), 16f, Ui.TEXT3), Ui.lp(t = 8))
-        return Ui.scroll(c, ing)
+        if (columns.isEmpty()) cols.addView(Ui.text(c, tr("Pas de liste d'ingrédients."), 13f, Ui.TEXT3))
+        return Ui.scroll(c, cols)
     }
 
     private fun stepsPane(): View {
@@ -256,9 +301,10 @@ class RecipeScreen(a: MainActivity, private val recipe: Recipe) : Screen(a) {
 
     private fun refreshFavorite() {
         val f = a.app.recipes.isFavorite(recipe.id)
-        Ui.buttonIcon(favButton)?.apply {
-            set(if (f) Icon.Kind.STAR_FILLED else Icon.Kind.STAR)
-            color = if (f) Ui.ACCENT else Ui.TEXT
+        (favButton.getChildAt(0) as? Icon)?.apply {
+            kind = if (f) Icon.Kind.STAR_FILLED else Icon.Kind.STAR
+            color = Ui.TEXT
+            invalidate()
         }
     }
 

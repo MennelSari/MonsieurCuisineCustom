@@ -78,22 +78,25 @@ class MainActivity : Activity() {
 
         root = FrameLayout(this)
         root.setBackgroundColor(Ui.BG)
-        val row = Ui.horizontal(this, Gravity.TOP)
-        rail = NavRail(this)
-        row.addView(rail, LinearLayout.LayoutParams(Ui.u(90), Ui.MATCH))
+        // Design v2 : en-tête, contenu, barre de cuisson, puis la navigation en pilule en bas.
         val column = Ui.vertical(this)
         topBar = TopBar(this)
-        column.addView(topBar, Ui.lp(Ui.MATCH, Ui.u(74)))
+        column.addView(topBar, Ui.lp(Ui.MATCH, Ui.u(64)))
         content = FrameLayout(this)
         column.addView(content, Ui.lp(Ui.MATCH, 0, 1f))
         machineBar = MachineDock(this)
-        column.addView(machineBar, Ui.lp(Ui.MATCH, Ui.u(82), l = 16, t = 6, r = 16, b = 14))
-        row.addView(column, LinearLayout.LayoutParams(0, Ui.MATCH, 1f))
-        root.addView(row, Ui.flp())
+        column.addView(machineBar, Ui.lp(Ui.MATCH, Ui.u(82), l = 26, t = 6, r = 26, b = 4))
+        rail = NavRail(this)
+        column.addView(rail, Ui.lp(Ui.MATCH, Ui.u(58), l = 26, t = 10, r = 26, b = 19))
+        root.addView(column, Ui.flp())
         overlay = FrameLayout(this)
         overlay.visibility = View.GONE
         root.addView(overlay, Ui.flp())
         setContentView(root)
+
+        // Recettes envoyées depuis le téléphone : enregistrées par le serveur, signalées ici.
+        app.importServer.onImported = { title, _ -> toast(tr("Recette reçue du téléphone : %s", title), Ui.OK) }
+        app.importServer.start()
 
         // Recettes déposées dans le dossier d'import (Thermomix…) : importées à l'ouverture, une fois
         // l'écran et le catalogue prêts (l'ouverture passe d'abord).
@@ -136,6 +139,8 @@ class MainActivity : Activity() {
         // Le pilote moteur est une appli à part : prévenir s'il manque ou n'est pas de la même version.
         main.postDelayed({
             when {
+                // En démo, le moteur est simulé : le pilote n'est pas nécessaire.
+                prefs.mode == Prefs.Mode.DEMO -> {}
                 app.machine.pilotMissing -> toast(tr("Pilote moteur absent : installez Camybrith-pilote.apk avec l'appli"), Ui.DANGER)
                 app.machine.pilotMismatch -> toast(tr("Pilote moteur d'une autre version : réinstallez les deux applis ensemble"), Ui.WARN)
             }
@@ -213,6 +218,7 @@ class MainActivity : Activity() {
     }
 
     override fun onDestroy() {
+        app.importServer.onImported = { _, _ -> }
         Ui.tapSound = {}
         sounds.release()
         super.onDestroy()
@@ -295,6 +301,7 @@ class MainActivity : Activity() {
         (v.parent as? FrameLayout)?.removeView(v)
         content.addView(v, Ui.flp())
         topBar.visibility = if (s.showTopBar) View.VISIBLE else View.GONE
+        rail.visibility = if (s.showNav) View.VISIBLE else View.GONE
         topBar.setTitle(s.title, s.subtitle, stack.size > 1)
         rail.select(stack.firstOrNull()?.section)
         s.onShow()
@@ -456,7 +463,14 @@ class MainActivity : Activity() {
      * Démarre un programme ; si le contenu est chaud, demande d'abord la confirmation
      * de mixage (comme l'appli d'origine, mais avant tout mouvement).
      */
+    /**
+     * Vrai juste après l'apparition ou la disparition de la barre de cuisson : les boutons viennent
+     * de changer de place, un appui peut tomber sur « Démarrer » au lieu de « OK ». On l'ignore.
+     */
+    fun dockJustMoved(): Boolean = android.os.SystemClock.uptimeMillis() - machineBar.changedAt < 1_200
+
     fun startJob(spec: JobSpec, onHotConfirmed: () -> Unit = {}, done: (Verdict) -> Unit = {}) {
+        if (dockJustMoved()) return
         machine.start(spec) { v ->
             if (!v.ok && v.has(SafetyPolicy.HOT_BLEND) && v.violations.size == 1) {
                 confirm(

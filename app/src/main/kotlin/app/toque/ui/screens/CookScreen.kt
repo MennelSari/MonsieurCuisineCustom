@@ -70,37 +70,124 @@ class CookScreen(a: MainActivity, private val recipe: Recipe, startStep: Int) : 
     private var popupNext: LinearLayout? = null
     private var popupCounter: TextView? = null
 
+    override val showTopBar = false
+    override val showNav = false
+    private lateinit var headTitle: TextView
+    private lateinit var headStep: TextView
+    private lateinit var progress: FrameLayout
+    private lateinit var progressFill: View
+    private lateinit var stepsList: LinearLayout
+    private lateinit var bowlView: android.widget.ImageView
+
+    /**
+     * Design v2 : en-tête (fermer, recette, « Étape 7 sur 18 », fine barre de progression) ;
+     * au centre la consigne en grand dans une carte blanche avec le rendu du bol ; à droite le
+     * panneau du réglage machine (ou la jauge de pesée) puis la liste des étapes ; en bas
+     * « Précédente » et « Suivante ». La logique de cuisson et de sécurité est celle de Camybrith.
+     */
     override fun build(): View {
         val root = Ui.vertical(c)
-        root.setPadding(Ui.u(24), Ui.u(2), Ui.u(22), Ui.u(14))
-        segments = Ui.horizontal(c)
-        root.addView(segments, Ui.lp(Ui.MATCH, Ui.u(6), b = 16))
+        root.setPadding(Ui.u(19), Ui.u(16), Ui.u(19), Ui.u(4))
+        val head = Ui.horizontal(c)
+        val close = FrameLayout(c)
+        close.background = Ui.pressable(Ui.round(Ui.SURFACE, 22.5f), 22.5f)
+        close.addView(Icon(c, Icon.Kind.CLOSE, Ui.TEXT).apply { strokeWidth = 2.6f }, Ui.flp(Ui.u(16), Ui.u(16), Gravity.CENTER))
+        close.isClickable = true
+        close.contentDescription = tr("Quitter la cuisson")
+        close.tap { a.back() }
+        head.addView(close, LinearLayout.LayoutParams(Ui.u(45), Ui.u(45)))
+        val ht = Ui.vertical(c)
+        val line = Ui.horizontal(c)
+        headTitle = Ui.ellipsize(Ui.text(c, recipe.title, 12f, Ui.TEXT, Ui.HEADING))
+        line.addView(headTitle, LinearLayout.LayoutParams(0, Ui.WRAP, 1f))
+        headStep = Ui.text(c, "", 12f, Ui.TEXT2, Ui.HEADING)
+        line.addView(headStep)
+        ht.addView(line)
+        progress = FrameLayout(c)
+        progress.background = Ui.round(Ui.SURFACE3, 2.5f)
+        progress.clipToOutline = true
+        progressFill = View(c).apply { background = Ui.round(Ui.INK, 2.5f) }
+        progress.addView(progressFill, FrameLayout.LayoutParams(0, Ui.MATCH))
+        ht.addView(progress, Ui.lp(Ui.MATCH, Ui.u(5), t = 7))
+        head.addView(ht, LinearLayout.LayoutParams(0, Ui.WRAP, 1f).apply { leftMargin = Ui.u(13) })
+        root.addView(head)
+        segments = Ui.horizontal(c) // remplacé par la barre de progression, gardé pour la logique
 
         val body = Ui.horizontal(c, Gravity.TOP)
-        val left = Ui.vertical(c)
-        text = Ui.text(c, "", 29f, Ui.TEXT, Ui.LIGHT).apply { setLineSpacing(0f, 1.2f) }
-        left.addView(Ui.scroll(c, text), LinearLayout.LayoutParams(Ui.MATCH, 0, 1f))
+        // Gauche : la liste des étapes.
+        val stepsCard = Ui.vertical(c)
+        stepsCard.setPadding(Ui.u(13), Ui.u(14), Ui.u(13), Ui.u(10))
+        stepsCard.background = Ui.round(Ui.SURFACE, 22f)
+        stepsCard.addView(Ui.text(c, tr("Étapes"), 14f, Ui.TEXT, Ui.HEADING), Ui.lp(b = 8, l = 3))
+        stepsList = Ui.vertical(c)
+        stepsCard.addView(stepsList)
+        body.addView(stepsCard, LinearLayout.LayoutParams(Ui.u(222), Ui.MATCH).apply { rightMargin = Ui.u(12) })
+        // Centre : la consigne et le bol.
+        val center = Ui.vertical(c)
+        center.setPadding(Ui.u(22), Ui.u(20), Ui.u(22), Ui.u(16))
+        center.background = Ui.round(Ui.SURFACE, 22f)
+        text = Ui.text(c, "", 22f, Ui.TEXT, Ui.HEADING).apply { setLineSpacing(0f, 1.18f); letterSpacing = -0.02f }
+        center.addView(Ui.scroll(c, text), LinearLayout.LayoutParams(Ui.MATCH, 0, 1f))
+        bowlView = Ui.bowl(c, "couvercle")
+        center.addView(bowlView, Ui.lp(Ui.MATCH, Ui.u(170), t = 6))
         bottom = FrameLayout(c)
-        left.addView(bottom, Ui.lp(t = 12))
-        body.addView(left, LinearLayout.LayoutParams(0, Ui.MATCH, 1f).apply { rightMargin = Ui.u(20) })
-
+        center.addView(bottom, Ui.lp(t = 10))
+        body.addView(center, LinearLayout.LayoutParams(0, Ui.MATCH, 1f).apply { rightMargin = Ui.u(12) })
+        // Droite : réglage machine (ou jauge de pesée), toute la hauteur.
         side = FrameLayout(c)
         panel = Ui.vertical(c)
-        panel.background = Ui.round(Ui.SURFACE, 24f)
-        Ui.lift(panel)
-        panel.setPadding(Ui.u(20), Ui.u(18), Ui.u(20), Ui.u(16))
-        body.addView(side, LinearLayout.LayoutParams(Ui.u(330), Ui.MATCH))
-        root.addView(body, LinearLayout.LayoutParams(Ui.MATCH, 0, 1f))
+        panel.background = Ui.round(Ui.SURFACE, 22f)
+        panel.setPadding(Ui.u(18), Ui.u(16), Ui.u(18), Ui.u(14))
+        body.addView(side, LinearLayout.LayoutParams(Ui.u(322), Ui.MATCH))
+        root.addView(body, LinearLayout.LayoutParams(Ui.MATCH, 0, 1f).apply { topMargin = Ui.u(13) })
 
         val nav = Ui.horizontal(c)
-        prevBtn = Ui.button(c, tr("Précédent"), Ui.Style.GHOST, Icon.Kind.BACK, height = 54, textSize = 17f) { go(index - 1) }
-        nav.addView(prevBtn)
+        prevBtn = Ui.button(c, tr("Précédente"), Ui.Style.SECONDARY, Icon.Kind.BACK, height = 58, textSize = 14f) { go(index - 1) }
+        prevBtn.background = Ui.pressable(Ui.round(Ui.SURFACE, 29f), 29f)
+        nav.addView(prevBtn, LinearLayout.LayoutParams(Ui.u(190), Ui.WRAP))
         nav.addView(Ui.spacer(c, weight = 1f), LinearLayout.LayoutParams(0, 1, 1f))
-        nextBtn = Ui.button(c, tr("Suivant"), Ui.Style.SECONDARY, Icon.Kind.CHEVRON, height = 54, textSize = 17f, iconAfter = true) { next() }
-        nav.addView(nextBtn)
-        root.addView(nav, Ui.lp(t = 12))
+        nextBtn = Ui.button(c, tr("Suivante"), Ui.Style.SECONDARY, Icon.Kind.CHEVRON, height = 58, textSize = 14f, iconAfter = true) { next() }
+        nav.addView(nextBtn, LinearLayout.LayoutParams(Ui.u(190), Ui.WRAP))
+        root.addView(nav, Ui.lp(t = 11))
         render()
         return root
+    }
+
+    /** Liste des étapes autour de l'étape en cours : faites en vert, en cours en noir. */
+    private fun renderSteps() {
+        stepsList.removeAllViews()
+        val n = recipe.steps.size
+        val from = (index - 2).coerceIn(0, maxOf(0, n - 7))
+        for (i in from until minOf(n, from + 7)) {
+            val st = recipe.steps[i]
+            val cur = i == index
+            val row = Ui.horizontal(c, Gravity.TOP)
+            row.setPadding(Ui.u(8), Ui.u(6), Ui.u(8), Ui.u(6))
+            row.background = Ui.pressable(Ui.round(if (cur) Ui.BG else Ui.SURFACE, 13f), 13f)
+            row.alpha = if (i < index) 0.55f else 1f
+            val dot = Ui.text(c, "${i + 1}", 9.5f, if (cur || i < index) Ui.ON_INK else Ui.TEXT, Ui.HEADING).apply { gravity = Gravity.CENTER }
+            dot.background = Ui.round(if (cur) Ui.INK else if (i < index) Ui.OK else Ui.SURFACE2, 10.5f)
+            row.addView(dot, LinearLayout.LayoutParams(Ui.u(21), Ui.u(21)))
+            val col = Ui.vertical(c)
+            col.addView(Ui.ellipsize(Ui.text(c, st.text.lineSequence().first().ifBlank { st.machine?.summary ?: "" }, 11f, Ui.TEXT, Ui.MEDIUM)))
+            st.machine?.let { col.addView(Ui.ellipsize(Ui.text(c, it.summary, 10f, Ui.TEXT2, Ui.HEADING)), Ui.lp(t = 1)) }
+            row.addView(col, LinearLayout.LayoutParams(0, Ui.WRAP, 1f).apply { leftMargin = Ui.u(9) })
+            row.isClickable = true
+            row.tap { go(i) }
+            stepsList.addView(row, Ui.lp(t = if (stepsList.childCount > 0) 3 else 0))
+        }
+    }
+
+    /** Rendu du bol selon le réglage de l'étape. */
+    private fun bowlFor(m: app.toque.core.recipes.StepMachine?): String = when (m?.program) {
+        null -> "vide"
+        app.toque.core.recipes.StepProgram.STEAM -> "vapeur"
+        app.toque.core.recipes.StepProgram.KNEAD -> "petrir"
+        app.toque.core.recipes.StepProgram.TOAST -> "rissoler"
+        app.toque.core.recipes.StepProgram.FERMENT -> "fermentation"
+        app.toque.core.recipes.StepProgram.SOUS_VIDE -> "sousvide"
+        app.toque.core.recipes.StepProgram.SMOOTHIE -> "smoothie"
+        else -> if (m.tempC > 0) "chauffe" else "couvercle"
     }
 
     private fun next() {
@@ -122,12 +209,12 @@ class CookScreen(a: MainActivity, private val recipe: Recipe, startStep: Int) : 
 
     private fun render() {
         val n = recipe.steps.size
-        segments.removeAllViews()
-        for (i in 0 until n) {
-            val v = View(c)
-            v.background = Ui.round(if (i < index) Ui.ACCENT else if (i == index) Ui.TEXT else Ui.SURFACE3, 3f)
-            segments.addView(v, LinearLayout.LayoutParams(0, Ui.MATCH, 1f).apply { if (i < n - 1) rightMargin = Ui.u(5) })
+        headStep.text = if (n == 0) "" else tr("Étape %d sur %d", index + 1, n)
+        progress.post {
+            (progressFill.layoutParams as FrameLayout.LayoutParams).width = if (n == 0) 0 else progress.width * (index + 1) / n
+            progressFill.requestLayout()
         }
+        renderSteps()
         a.refreshTitle()
         bottom.removeAllViews()
         side.removeAllViews()
@@ -140,8 +227,9 @@ class CookScreen(a: MainActivity, private val recipe: Recipe, startStep: Int) : 
         }
         val step = recipe.steps[index]
         text.text = step.text.ifBlank { step.machine?.summary ?: "" }
+        bowlView.setImageBitmap(Ui.bowlBitmap(c, bowlFor(step.machine)))
         Ui.setButtonEnabled(prevBtn, index > 0)
-        Ui.buttonText(nextBtn)?.text = if (index == n - 1) tr("Terminer") else tr("Suivant")
+        Ui.buttonText(nextBtn)?.text = if (index == n - 1) tr("Terminer") else tr("Suivante")
         val w = step.weigh
         if (w != null) {
             // Pesée donnée par la recette : la jauge prend la place du panneau.
@@ -182,9 +270,9 @@ class CookScreen(a: MainActivity, private val recipe: Recipe, startStep: Int) : 
     }
 
     private fun highlightNext(on: Boolean) {
-        nextBtn.background = Ui.pressable(Ui.round(if (on) Ui.ACCENT else Ui.SURFACE2, 27f), 27f)
-        Ui.buttonText(nextBtn)?.setTextColor(if (on) Ui.ON_ACCENT else Ui.TEXT)
-        Ui.buttonIcon(nextBtn)?.color = if (on) Ui.ON_ACCENT else Ui.TEXT
+        nextBtn.background = Ui.pressable(Ui.round(if (on) Ui.INK else Ui.SURFACE, 29f), 29f)
+        Ui.buttonText(nextBtn)?.setTextColor(if (on) Ui.ON_INK else Ui.TEXT)
+        Ui.buttonIcon(nextBtn)?.color = if (on) Ui.ON_INK else Ui.TEXT
     }
 
     /** Quantités écrites dans l'étape, à peser d'un appui. */

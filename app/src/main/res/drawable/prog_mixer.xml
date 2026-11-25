@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icône au trait du design v2 (Mixer), recolorée par le code. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:pathData="M3.5 11h12a6 6 0 0 1-12 0zM7 11c.3-1.5 1.5-2.5 3-2.3 1.2-1.5 3-1.5 4 0M19 3.5c1.2 0 2 1.2 2 2.8s-.8 2.7-2 2.7-2-1.2-2-2.7.8-2.8 2-2.8zM19 9v11" android:fillColor="#00000000" android:strokeColor="#FF121212"
+        android:strokeWidth="1.4" android:strokeLineCap="round" android:strokeLineJoin="round" />
+</vector>

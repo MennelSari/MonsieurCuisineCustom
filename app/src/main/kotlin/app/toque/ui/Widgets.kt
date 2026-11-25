@@ -554,36 +554,42 @@ class LiquidGauge(c: Context) : View(c) {
 }
 
 /** Vignette de recette (accueil, catalogue) : photo, titre, durée et catégorie. */
-class RecipeCard(c: Context, private val photoHeight: Int) : LinearLayout(c) {
-    private val photoBox = FrameLayout(c)
-    private val plate = Icon(c, Icon.Kind.PLATE, Ui.placeholderInk).apply { strokeWidth = 1.3f }
+/**
+ * Carte recette du design v2 : la photo occupe toute la carte, l'origine (Lidl, Cookomix, Mes
+ * recettes) en pastille en haut, le titre et la durée dans un encart blanc en bas.
+ */
+class RecipeCard(c: Context, private val cardHeight: Int) : FrameLayout(c) {
     private val image = ImageView(c).apply { scaleType = ImageView.ScaleType.CENTER_CROP }
+    private val source = Ui.text(c, "", 10.5f, Ui.TEXT, Ui.HEADING)
     private val star = FrameLayout(c)
-    private val titleView = Ui.ellipsize(Ui.text(c, "", 16.5f, Ui.TEXT, Ui.MEDIUM).apply { setLineSpacing(0f, 1.08f) }, 2)
-    private val meta = Ui.ellipsize(Ui.text(c, "", 13.5f, Ui.TEXT2))
+    private val titleView = Ui.ellipsize(Ui.text(c, "", 13.5f, Ui.TEXT, Ui.HEADING).apply { setLineSpacing(0f, 1.12f) }, 2)
+    private val meta = Ui.ellipsize(Ui.text(c, "", 11f, Ui.TEXT2, Ui.MEDIUM))
     var id = ""
         private set
 
     init {
-        orientation = VERTICAL
-        background = Ui.round(Ui.SURFACE, 18f)
+        minimumHeight = Ui.u(cardHeight)
         clipToOutline = true
-        Ui.lift(this, 2f)
-        photoBox.addView(plate, Ui.flp(Ui.u(photoHeight * 0.34f), Ui.u(photoHeight * 0.34f), Gravity.CENTER))
-        photoBox.addView(image, Ui.flp())
-        star.background = Ui.round(Ui.SURFACE, 15f)
-        star.addView(Icon(c, Icon.Kind.STAR_FILLED, Ui.ACCENT), Ui.flp(Ui.u(16), Ui.u(16), Gravity.CENTER))
-        photoBox.addView(star, Ui.flp(Ui.u(30), Ui.u(30), Gravity.TOP or Gravity.END).apply { setMargins(0, Ui.u(9), Ui.u(9), 0) })
-        addView(photoBox, LayoutParams(Ui.MATCH, Ui.u(photoHeight)))
+        addView(image, Ui.flp())
+        val top = Ui.horizontal(c)
+        source.setPadding(Ui.u(10), Ui.u(5), Ui.u(10), Ui.u(5))
+        source.background = Ui.round(0xE6FFFFFF.toInt(), 10f)
+        top.addView(source)
+        top.addView(View(c), LinearLayout.LayoutParams(0, 1, 1f))
+        star.background = Ui.round(0xE6FFFFFF.toInt(), 14f)
+        star.addView(Icon(c, Icon.Kind.STAR_FILLED, Ui.TEXT), Ui.flp(Ui.u(14), Ui.u(14), Gravity.CENTER))
+        top.addView(star, LinearLayout.LayoutParams(Ui.u(28), Ui.u(28)))
+        addView(top, Ui.flp(Ui.MATCH, Ui.WRAP, Gravity.TOP).apply { setMargins(Ui.u(13), Ui.u(13), Ui.u(13), 0) })
         val body = Ui.vertical(c)
-        body.setPadding(Ui.u(13), Ui.u(10), Ui.u(12), Ui.u(12))
-        body.addView(titleView, Ui.lp(Ui.MATCH, Ui.u(38)))
-        val m = Ui.horizontal(c)
-        m.addView(Icon(c, Icon.Kind.CLOCK, Ui.TEXT2), LayoutParams(Ui.u(14), Ui.u(14)).apply { rightMargin = Ui.u(5) })
-        m.addView(meta, LayoutParams(0, Ui.WRAP, 1f))
-        body.addView(m, Ui.lp(t = 6))
-        addView(body, Ui.lp())
+        body.setPadding(Ui.u(13), Ui.u(11), Ui.u(13), Ui.u(11))
+        body.background = Ui.round(Ui.SURFACE, 16f)
+        body.addView(titleView)
+        body.addView(meta, Ui.lp(t = 3))
+        addView(body, Ui.flp(Ui.MATCH, Ui.WRAP, Gravity.BOTTOM).apply { setMargins(Ui.u(8), 0, Ui.u(8), Ui.u(8)) })
     }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) =
+        super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(Ui.u(cardHeight), MeasureSpec.EXACTLY))
 
     fun bind(e: SearchIndex.Entry, favorite: Boolean, imageFile: java.io.File?) {
         id = e.id
@@ -593,9 +599,12 @@ class RecipeCard(c: Context, private val photoHeight: Int) : LinearLayout(c) {
         if (e.category.isNotBlank()) parts += e.category
         if (e.ratingCount > 0) parts += "★ " + String.format(I18n.locale, "%.1f", e.rating)
         meta.text = parts.joinToString(" · ")
-        (meta.parent as View).visibility = if (parts.isEmpty()) GONE else VISIBLE
+        meta.visibility = if (parts.isEmpty()) GONE else VISIBLE
+        val (label, color) = Ui.origin(e.id, e.source)
+        source.text = label
+        source.setTextColor(color)
         star.visibility = if (favorite) VISIBLE else GONE
-        photoBox.background = Ui.gradient(Ui.placeholderColors(e.title), 0f)
-        ImageLoader.load(image, imageFile, Ui.u(260))
+        background = Ui.gradient(Ui.placeholderColors(e.title), 18f)
+        ImageLoader.load(image, imageFile, Ui.u(360))
     }
 }

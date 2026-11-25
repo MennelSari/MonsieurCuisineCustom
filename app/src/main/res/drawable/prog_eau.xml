@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icône au trait du design v2 (Chauffer l’eau), recolorée par le code. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:pathData="M6 9h11l-1.2 11.5H7.2zM17 11h1.5a2.2 2.2 0 0 1 0 4.4H16.6M8.5 9V7.5a3 3 0 0 1 6 0V9M11.5 3.5v1" android:fillColor="#00000000" android:strokeColor="#FF121212"
+        android:strokeWidth="1.4" android:strokeLineCap="round" android:strokeLineJoin="round" />
+</vector>

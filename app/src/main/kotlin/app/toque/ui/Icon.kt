@@ -13,6 +13,8 @@ class Icon(context: Context, var kind: Kind, color: Int) : View(context) {
         BACK, SEARCH, PLAY, PAUSE, STOP, THERMO, SPEED, CLOCK, REVERSE, SCALE, BOOK, STAR, STAR_FILLED,
         SETTINGS, PLUS, MINUS, CHECK, CLOSE, KNEAD, STEAM, FLAME, BOLT, SYNC, LID, WARNING, HOME, WHISK,
         CHEVRON, LINK, INFO, POT, TIMER, GRID, SLIDERS, HAT, FORWARD, BLADE, PLATE, DROP, CHEVRON_DOWN,
+        /** Design v2 : maillons de chaîne (importer un lien) et crayon (créer, modifier). */
+        CHAIN, PEN,
     }
 
     /** Épaisseur du trait, en unités de la grille 24 × 24. */
@@ -150,6 +152,16 @@ class Icon(context: Context, var kind: Kind, color: Int) : View(context) {
                 rect.set(9.5f, 2.5f, 14.5f, 16f); canvas.drawOval(rect, stroke)
             }
             Kind.LINK -> { canvas.drawCircle(12f, 12f, 4f, fill); canvas.drawCircle(12f, 12f, 8.5f, stroke) }
+            Kind.CHAIN -> {
+                canvas.save(); canvas.rotate(-45f, 12f, 12f)
+                rect.set(2.5f, 8.8f, 13.3f, 15.2f); canvas.drawRoundRect(rect, 3.2f, 3.2f, stroke)
+                rect.set(10.7f, 8.8f, 21.5f, 15.2f); canvas.drawRoundRect(rect, 3.2f, 3.2f, stroke)
+                canvas.restore()
+            }
+            Kind.PEN -> {
+                path.reset(); path.moveTo(4f, 20f); path.lineTo(8f, 20f); path.lineTo(18.5f, 9.5f); path.lineTo(14.5f, 5.5f); path.lineTo(4f, 16f); path.close()
+                canvas.drawPath(path, stroke); canvas.drawLine(12.5f, 7.5f, 16.5f, 11.5f, stroke)
+            }
             Kind.INFO -> { canvas.drawCircle(12f, 12f, 9f, stroke); canvas.drawLine(12f, 11f, 12f, 16.5f, stroke); canvas.drawCircle(12f, 7.8f, 1.2f, fill) }
             Kind.GRID -> {
                 for ((x, y) in listOf(4f to 4f, 13f to 4f, 4f to 13f, 13f to 13f)) { rect.set(x, y, x + 7f, y + 7f); canvas.drawRoundRect(rect, 2f, 2f, stroke) }

@@ -44,7 +44,7 @@ class Prefs(context: Context) {
 
     /** Thème de l'interface : « auto » (clair de 7 h à 20 h, sombre le soir), « light » ou « dark ». */
     var theme: String
-        get() = p.getString("theme", "auto") ?: "auto"
+        get() = p.getString("theme", "light") ?: "light"
         set(v) {
             p.edit().putString("theme", v).commit()
         }

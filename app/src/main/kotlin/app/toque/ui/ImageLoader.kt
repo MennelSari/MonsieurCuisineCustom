@@ -17,6 +17,12 @@ object ImageLoader {
     private val exec = Executors.newFixedThreadPool(2) { r -> Thread(r, "toque-images").apply { priority = Thread.MIN_PRIORITY } }
     private val main = Handler(Looper.getMainLooper())
 
+    /** Oublie les versions en cache d'une photo qui vient d'être remplacée. */
+    fun forget(file: File) {
+        val prefix = file.absolutePath + "@"
+        for (k in cache.snapshot().keys) if (k.startsWith(prefix)) cache.remove(k)
+    }
+
     fun load(view: ImageView, file: File?, targetWidth: Int) {
         view.tag = file?.absolutePath
         view.setImageDrawable(null)
